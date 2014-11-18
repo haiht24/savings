@@ -2,14 +2,14 @@
  $parse_uri = explode('wp-content', $_SERVER['SCRIPT_FILENAME']);
  require_once ($parse_uri[0] . 'wp-load.php');
  require_once (get_template_directory() . '/ajax/bot_libs/simple_html_dom.php');
-
+ // GET STORES
  if ($_POST['action'] == 'get_store') {
      $homeUrl = "http://savings.com";
-     //$cat_id = $_POST['cat_id'];
-     //$cat_name = $_POST['cat_name'];
+     $cat_id = $_POST['cat_id'];
+     $cat_name = $_POST['cat_name'];
      $currentPageNumber = $_POST['pageNum'];
-     $cat_id = 2;
-     $cat_name = 'apparel-accessories';
+     //     $cat_id = 639;
+     //     $cat_name = 'apparel-accessories';
 
      $catUrl = get_tax_meta($cat_id, 'category_url');
      $catUrl = str_replace('.html', '', $catUrl);
@@ -60,12 +60,20 @@
      $result['isNext'] = sizeof($html->find('a[class="button next disabled"]'));
      $result['currentPageNumber'] = $currentPageNumber;
      $result['numAdded'] = $numAdded;
+     if ($result['isNext'] == 1) {
+         // Mark as getted stores
+         $tax_meta = new Tax_Meta_Class(array());
+         $tax_meta->save_field($cat_id, array('id' => 'already_get_store'), '', 'yes');
+     }
+
      echo json_encode($result);
  }
+ // LOAD STORES
  if ($_POST['action'] == 'loadStores') {
      $arrStores = savings_printStoresNotGetCoupons();
      echo json_encode($arrStores);
  }
+ // GET COUPONS
  if ($_POST['action'] == 'getCoupons') {
      $c = 0;
      $storeID = $_POST['storeID'];
@@ -73,13 +81,17 @@
      $last_number_coupon = get_post_meta($storeID, 'last_number_coupon', true);
 
      //$storeURL = "http://www.savings.com/m-Amazon-coupons.html";
+     //$storeURL = "http://www.savings.com/c-Nightlife-coupons.html";
      if (!file_get_html($storeURL)) {
          die('Error at: ' . $storeURL);
      }
      $html = file_get_html($storeURL);
      // Get store description and update to DB
      $storeDesc = $html->find('div[data-id="text-full"]', 0)->plaintext;
-     wp_update_post(array('ID' => $storeID, 'post_content' => $storeDesc));
+     if ($storeDesc) {
+         wp_update_post(array('ID' => $storeID, 'post_content' => $storeDesc));
+     }
+
      // Get coupons
      // If store have new coupons
      $countCurrentCoupons = count($html->find('div[class="hasCode"]'));
@@ -109,11 +121,13 @@
          echo $c;
      }
      // Add expired coupons
+     $countExpiredCouponAdded = 0;
      foreach ($html->find('div[class="module-deal expired revealCode"]') as $div) {
          savings_addExpiredCoupon($div, $storeID);
      }
+
  }
- // Get categories
+ // GET CATEGORIES
  if ($_POST['action'] == 'get_categories') {
      $home = 'http://www.savings.com';
      $keywordAfterSlug = $_POST['keyword'];
@@ -145,8 +159,12 @@
      $home = 'http://www.savings.com';
      $url = $_POST['categoryURL'];
      //$url = 'http://www.savings.com/c-Apparel-and-Accessories-coupons.html';
+     //$url = 'http://www.savings.com/c-Nightlife-coupons.html';
      $catID = $_POST['categoryID'];
      $keywordAfterSlug = $_POST['keyword'];
+     // Mark as checked
+     $tax_meta = new Tax_Meta_Class(array());
+     $tax_meta->save_field($catID, array('id' => 'checked'), '', 'yes');
 
      $html = file_get_html($url);
      // find div Related category
@@ -161,13 +179,14 @@
              $catName = str_replace('&nbsp;', '', $catName);
              $catName = strip_tags(trim($catName));
              $catUrl = $c->find('a', 0)->href;
-             if($catUrl)
-                $catUrl = $home . $catUrl;
+             if ($catUrl)
+                 $catUrl = $home . $catUrl;
              else
-                return;
+                 return;
 
              // Add new category if not exist
-             $term = wp_insert_term($catName, 'store_category', array('slug' => $catName . $keywordAfterSlug, 'parent'=> $catID));
+             $term = wp_insert_term($catName, 'store_category', array('slug' => $catName . $keywordAfterSlug,
+                     'parent' => $catID));
              if (!$term->errors) {
                  $term_id = $term['term_id'];
                  $html_input_new_category = "<input class='cat' id='{$term_id}' value='$catUrl' type='hidden'>";
@@ -180,15 +199,12 @@
              }
          }
      }
-     // Mark as checked
-     $tax_meta = new Tax_Meta_Class(array());
-     $tax_meta->save_field($catID, array('id' => 'checked'), '', 'yes');
-     if(count($arr_newcat) > 0){
-        $arr['new_cat'] = $arr_newcat;
-        echo json_encode($arr);
-     }
-     else{
-        echo 'empty';
+
+     if (count($arr_newcat) > 0) {
+         $arr['new_cat'] = $arr_newcat;
+         echo json_encode($arr);
+     } else {
+         echo count($arr_newcat);
      }
 
  }
@@ -215,6 +231,9 @@
              $tax_meta->save_field($t->term_id, array('id' => 'checked'), '', 'no');
          }
      }
+ }
+ if ($_POST['action'] == 'loadCatNotGetStores') {
+     echo json_encode(print_cat_not_getted_stores('array'));
  }
  // Reset last number coupon
 

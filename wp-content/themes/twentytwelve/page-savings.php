@@ -10,6 +10,7 @@ body {margin: 10px;}
 </style>
 <script>
     jQuery(document).ready(function($){
+
         // Get categories
         $('#btnGetCategories').click(function(){
              $.ajax({
@@ -39,7 +40,7 @@ body {margin: 10px;}
                 success: function(rs) {
                     if(rs.length > 0){
                         for(i = 0; i < rs.length; i++){
-                            $('.not_check_cat').append(rs[i]);
+                            $('.cat_not_check_cat').append(rs[i]);
                         }
                         workerGetCat();
                     }
@@ -59,20 +60,20 @@ body {margin: 10px;}
                     data: {action : 'get_other_cat', categoryID : catID, categoryURL : cat_url, keyword : $('#txtKeywordAfterSlug').val()},
                     dataType : 'json',
                     success: function(rs) {
-                        if(rs && rs['new_cat'].length > 0 && rs != 'empty')
+                        if(rs && rs['new_cat'].length > 0 && parseInt(rs) > 0)
                         {
                             // Append new category to div
                             for (i = 0; i < rs['new_cat'].length; i++) {
-                                $('.not_check_cat').prepend(rs['new_cat'][i]);
+                                $('.cat_not_check_cat').prepend(rs['new_cat'][i]);
                             }
                         }
                     },
                     complete: function() {
                         $('#' + catID + '.cat').remove();
-                        setTimeout(workerGetCat, 1000);
+                        setTimeout(workerGetCat, 0);
                     },
                     error: function(){
-                        alert('error');
+                        console.log(0);
                     }
                 });
             }
@@ -86,22 +87,59 @@ body {margin: 10px;}
             $(this).val('Processing...');
             workerGetStoresFromCategory();
         })
+        // Load categories not get store
+        $('#btnLoadCatNotGetStores').click(function(){
+            loadCategoryNotGetStores();
+
+        })
         function workerGetStoresFromCategory(){
+
+            if($('.catNotGetStore').length > 0){
+                cat_id = $('.catNotGetStore').attr('id');
+                cat_name = $('.catNotGetStore').val();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '<?php echo get_template_directory_uri() ?>' + "/ajax/ajax_savings.php",
+                    data: {action : 'get_store', pageNum : $('#currentPage').val(), cat_id : cat_id, cat_name : cat_name},
+                    dataType : 'json',
+                    success: function(rs) {
+                        if(parseInt(rs['isNext']) == 0){
+                            console.log(rs['numAdded']);
+                            nextPage = parseInt(rs['currentPageNumber']) + 1;
+                            $('#currentPage').val(nextPage);
+                            setTimeout(workerGetStoresFromCategory, 0);
+                        }else // if is last page
+                        {
+                            $('#' + cat_id + '.catNotGetStore').remove();
+                            $('#currentPage').val(1);
+                            $('#btnLoadCatNotGetStores').val('Load Categories Not Get Store (remain: ' + $('.catNotGetStore').length + ')');
+                            setTimeout(workerGetStoresFromCategory, 0);
+                        }
+                    },
+                    complete: function() {
+                        $('#btnGetStore').text('Done');
+                    }
+                });
+            }
+
+        }
+        // Print category not get stores
+        function loadCategoryNotGetStores(){
             $.ajax({
                 type: 'POST',
                 url: '<?php echo get_template_directory_uri() ?>' + "/ajax/ajax_savings.php",
-                data: {action : 'get_store', pageNum : $('#currentPage').val()},
+                data: {action : 'loadCatNotGetStores'},
                 dataType : 'json',
                 success: function(rs) {
-                    if(rs['isNext'] == 0){
-                        console.log(rs['numAdded']);
-                        nextPage = parseInt(rs['currentPageNumber']) + 1;
-                        $('#currentPage').val(nextPage);
-                        setTimeout(workerGetStoresFromCategory, 0);
+                    if(rs.length > 0){
+                        for (i = 0; i < rs.length; i++) {
+                            $('.cat_not_get_store').append(rs[i]);
+                        }
                     }
+                    $('#btnLoadCatNotGetStores').val($('#btnLoadCatNotGetStores').val() + ' (' + rs.length + ')');
                 },
                 complete: function() {
-                    $('#btnGetStore').text('Done');
                 }
             });
         }
@@ -144,7 +182,8 @@ body {margin: 10px;}
                     data: {action : 'getCoupons',storeID : storeID, storeURL : storeURL},
                     success: function(rs) {
                         //$('#result').append(rs + ' coupons added<br/>');
-                        $('#result').append(rs + '<br>');
+                        //$('#result').append(rs + '<br>');
+                        console.log(rs);
                     },
                     complete: function() {
                         $('#' + storeID + '.store_not_get_coupon').remove();
@@ -198,14 +237,20 @@ body {margin: 10px;}
                 }
             });
         })
+        // Test
+        $('#btnTest').click(function(){
+            loadCategoryNotGetStores();
+        })
     })
 </script>
 <div id="control">
+<input type="button" value="test" id="btnTest" />
     <input type="button" id="btnGetCategories" value="Get Categories" />
     <input type="text" id="txtKeywordAfterSlug" value="-coupon-codes" placeholder="eg: -coupon-codes" />
     <input type="button" id="btnRSGetCategory" value="Reset check get child categories" />
     <input type="button" id="fastGetCat" value="Fast check get cat" />
 <hr />
+    <input type="button" id="btnLoadCatNotGetStores" value="Load Categories Not Get Store" />
     <input type="button" id="btnGetStore" value="Get Store" />
     <label>Current Category Page: </label><input type="text" id="currentPage" value="1"/>
 <hr />
@@ -218,7 +263,10 @@ body {margin: 10px;}
 <label id="messStoreNotGetCoupon"></label>
 <div id="storeNotGetCoupon" style='height: 200px; overflow-y: scroll;'></div>
 <div id="result" style='height: 200px; overflow-y: scroll;'></div>
-<div class="not_check_cat" style="background-color: lightgreen;height: 25px;text-align: center;">
+<div class="cat_not_check_cat" style="background-color: lightgreen;height: 25px;text-align: center;">
     <label style="padding: 10px;">Category not check</label>
+</div>
+<div class="cat_not_get_store" style="background-color: lightgreen;height: 25px;text-align: center;">
+    <label style="padding: 10px;">Category not get stores</label>
 </div>
 <?php wp_footer(); ?>

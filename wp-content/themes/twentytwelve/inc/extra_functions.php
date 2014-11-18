@@ -91,12 +91,13 @@
 		}
 	}
 	// PRINT CATEGORY NOT GET STORES
-	function print_cat_not_getted_stores()
+	function print_cat_not_getted_stores($returnType = '')
 	{
 		$terms = get_terms('store_category', array(
 			'hide_empty' => 0,
 			'orderby' => 'id',
 			'order' => 'ASC'));
+        $arr = array();
 		if (count($terms) > 0)
 		{
 			foreach ($terms as $t)
@@ -104,11 +105,17 @@
 				$vl = get_tax_meta($t->term_id, 'already_get_store');
 				if ($vl == '')
 				{
-					$ip = "<input class='cat_not_get_store' id='{$t->term_id}' value='{$t->name}' type='hidden'>";
-					echo $ip;
+					$ip = "<input class='catNotGetStore' id='{$t->term_id}' value='{$t->name}' type='hidden'>";
+                    if($returnType == 'array')
+                        array_push($arr, $ip);
+                    else
+					   echo $ip;
 				}
 			}
 		}
+        if($returnType == 'array'){
+            return $arr;
+        }
 	}
 	// PRINT STORES NOT GET COUPON
 	function print_stores_not_get_coupon()
@@ -125,7 +132,7 @@
 				{
 					$store_url = get_post_meta($r->ID, 'store_url_metadata', true);
 					$ip = "<input class='store_not_get_coupon' id='{$r->ID}' value='{$store_url}' type='hidden'>";
-					echo $ip;
+                    echo $ip;
 				}
 			}
 		}
