@@ -8,13 +8,15 @@
      $cat_id = $_POST['cat_id'];
      $cat_name = $_POST['cat_name'];
      $currentPageNumber = $_POST['pageNum'];
-     //     $cat_id = 639;
-     //     $cat_name = 'apparel-accessories';
 
      $catUrl = get_tax_meta($cat_id, 'category_url');
      $catUrl = str_replace('.html', '', $catUrl);
      $catUrl = $catUrl . '-' . $currentPageNumber . '.html';
+
      $html = file_get_html($catUrl);
+     if (!$html) {
+         die('Can not get HTML content. Plz try again');
+     }
 
      // Find parent class : contain store logo,name and store url
      $storeDivParent = $html->find('.module-deal');
@@ -78,21 +80,64 @@
      $c = 0;
      $storeID = $_POST['storeID'];
      $storeURL = $_POST['storeURL'];
+     //$storeURL = 'http://www.savings.com/m-Kmart-coupons.html';
+     //$storeURL = 'http://www.savings.com/m-SuperStarTickets-coupons.html';
      $last_number_coupon = get_post_meta($storeID, 'last_number_coupon', true);
+
+     $curl = curl_init();
+     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+     curl_setopt($curl, CURLOPT_HEADER, false);
+     curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+     curl_setopt($curl, CURLOPT_URL, $storeURL);
+     curl_setopt($curl, CURLOPT_REFERER, $storeURL);
+     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+     $str = curl_exec($curl);
+     curl_close($curl);
+     $html = new simple_html_dom();
+     $html->load($str);
+     if (!$html) {
+         die('Can not get Html content. Plz try again');
+     }
 
      //$storeURL = "http://www.savings.com/m-Amazon-coupons.html";
      //$storeURL = "http://www.savings.com/c-Nightlife-coupons.html";
-     if (!file_get_html($storeURL)) {
-         die('Error at: ' . $storeURL);
-     }
-     $html = file_get_html($storeURL);
+     //     if (!file_get_html($storeURL)) {
+     //         die('Error at: ' . $storeURL);
+     //     }
+     //$html = file_get_html($storeURL);
+
      // Get store description and update to DB
      $storeDesc = $html->find('div[data-id="text-full"]', 0)->plaintext;
      if ($storeDesc) {
          wp_update_post(array('ID' => $storeID, 'post_content' => $storeDesc));
      }
-
-     // Get coupons
+     // Get store Home page
+     $storeHomePage = '';
+     foreach ($html->find('div[class="merchant-links module"] li') as $li) {
+         $liValue = trim($li->find('a', 0)->plaintext);
+         if (strpos('Home Page', $liValue) >= 0) {
+             $storeHomePage = $li->find('a', 0)->href;
+             break;
+         }
+     }
+     if ($storeDesc) {
+         update_post_meta($storeID, 'store_homepage_metadata', $storeHomePage);
+     }
+     // Re-Update parent categories of store
+     $storeBreadcrum = $html->find('div[class="breadcrumb clearfix"] a');
+     $arrCategoriesName = array();
+     foreach ($storeBreadcrum as $a) {
+         $reCategoryName = trim(str_replace('&', 'and', $a->plaintext));
+         if ($reCategoryName != 'Categories') {
+             array_push($arrCategoriesName, $reCategoryName);
+         }
+     }
+     if (count($arrCategoriesName) > 0) {
+         wp_add_object_terms($storeID, $arrCategoriesName, 'store_category');
+     }
+     /**
+      * GET COUPONS OF STORE
+      */
      // If store have new coupons
      $countCurrentCoupons = count($html->find('div[class="hasCode"]'));
      if ($last_number_coupon) {
@@ -107,7 +152,7 @@
              update_post_meta($storeID, 'last_number_coupon', $countCurrentCoupons);
              update_post_meta($storeID, 'is_get_coupon', 1);
              echo $c;
-             return;
+             //return;
          }
      } else { // First time get coupons
          foreach ($html->find('div[class="hasCode"]') as $div) {
@@ -125,7 +170,8 @@
      foreach ($html->find('div[class="module-deal expired revealCode"]') as $div) {
          savings_addExpiredCoupon($div, $storeID);
      }
-
+     $html->clear();
+     unset($html);
  }
  // GET CATEGORIES
  if ($_POST['action'] == 'get_categories') {
