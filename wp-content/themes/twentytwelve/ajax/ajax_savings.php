@@ -42,6 +42,7 @@
      if (count($arrStores) > 0) {
          $numAdded = 0;
          foreach ($arrStores as $s) {
+             $logo = '';
              if (check_exist_title($s['name']) == 0) {
                  $postArgs = array(
                      'post_title' => $s['name'],
@@ -53,7 +54,9 @@
                      $numAdded++;
                      wp_set_object_terms($newStoreId, array($cat_name), 'store_category');
                      add_post_meta($newStoreId, 'store_url_metadata', $s['url'], true);
-                     add_post_meta($newStoreId, 'store_img_metadata', $s['logo'], true);
+                     // upload logo to server
+                     $logo = uploadLogoToServer($s['logo'], $s['name']);
+                     add_post_meta($newStoreId, 'store_img_metadata', $logo, true);
                  }
              }
          }

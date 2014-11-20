@@ -10,6 +10,7 @@ jQuery(document).ready(function($){
                 success: function(rs) {
                     getOtherCategories();
                 },
+                timeout : 999999999,
                 complete: function() {
                     $('#btnGetCategories').text('Done');
                 }
@@ -34,6 +35,7 @@ jQuery(document).ready(function($){
                         workerGetCat();
                     }
                 },
+                timeout : 999999999,
                 complete: function() {
                 }
             });
@@ -57,6 +59,7 @@ jQuery(document).ready(function($){
                             }
                         }
                     },
+                    timeout : 999999999,
                     complete: function() {
                         $('#' + catID + '.cat').remove();
                         setTimeout(workerGetCat, 0);
@@ -105,6 +108,7 @@ jQuery(document).ready(function($){
                             setTimeout(workerGetStoresFromCategory, 0);
                         }
                     },
+                    timeout : 999999999,
                     complete: function() {
                         $('#btnGetStore').text('Done');
                     }
@@ -127,6 +131,7 @@ jQuery(document).ready(function($){
                     }
                     $('#btnLoadCatNotGetStores').val($('#btnLoadCatNotGetStores').val() + ' (' + rs.length + ')');
                 },
+                timeout : 999999999,
                 complete: function() {
                 }
             });
@@ -151,6 +156,7 @@ jQuery(document).ready(function($){
                     }
                     $('#btnLoadStores').val('Load Stores Not Get Coupons (' + rs.length + ')');
                 },
+                timeout : 999999999,
                 complete: function() {}
             });
         })
@@ -171,6 +177,7 @@ jQuery(document).ready(function($){
                     success: function(rs) {
                         console.log(rs + ' new active coupons added');
                     },
+                    timeout : 999999999,
                     complete: function() {
                         $('#' + storeID + '.store_not_get_coupon').remove();
                         // Count remain

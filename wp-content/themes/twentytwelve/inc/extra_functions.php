@@ -3,6 +3,34 @@
 	include_once ('load_metadata.php');
     include_once ('load_widgets.php');
 	////////////////////////////////////////////CRAWL FUNCTIONS//////////////////////////////////////////////////////
+    function _get_attachment_id_from_src($guid) {
+        global $wpdb;
+        $query = "SELECT ID FROM {$wpdb->posts} WHERE guid='$guid'";
+        $id = $wpdb->get_var($query);
+        return $id;
+    }
+    function getImageType($imgSrc){
+        $image_type = explode('/', $imgSrc);
+        $image_type = $image_type[count($image_type) - 1];
+        $image_type = explode('.', $image_type);
+        return $image_type[1];
+    }
+    function uploadLogoToServer($imgSrc, $storeName){
+        $image_type = getImageType($imgSrc);
+        $storeName = str_replace(' ', '_', $storeName);
+
+        $fileName = $storeName.'_coupon_codes_logo.'.$image_type;
+        $uploadDir = wp_upload_dir();
+        $uploadPath = $uploadDir['path'] . '/' . $fileName;
+        $guid = $uploadDir['url'] . '/' . $fileName;
+
+        $contents = file_get_contents($imgSrc);
+		$savefile = fopen($uploadPath, 'w');
+		fwrite($savefile, $contents);
+		fclose($savefile);
+        return $guid;
+    }
+
     function append_slug($data)
 	{
 		global $post_ID;
