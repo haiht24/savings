@@ -62,7 +62,7 @@ jQuery(document).ready(function($){
                     timeout : 999999999,
                     complete: function() {
                         $('#' + catID + '.cat').remove();
-                        setTimeout(workerGetCat, 0);
+                        setTimeout(workerGetCat, 2000);
                     },
                     error: function(){
                         console.log(0);
@@ -99,13 +99,13 @@ jQuery(document).ready(function($){
                             console.log(rs['numAdded']);
                             nextPage = parseInt(rs['currentPageNumber']) + 1;
                             $('#currentPage').val(nextPage);
-                            setTimeout(workerGetStoresFromCategory, 0);
+                            setTimeout(workerGetStoresFromCategory, 2000);
                         }else // if is last page
                         {
                             $('#' + cat_id + '.catNotGetStore').remove();
                             $('#currentPage').val(1);
                             $('#btnLoadCatNotGetStores').val('Load Categories Not Get Store (remain: ' + $('.catNotGetStore').length + ')');
-                            setTimeout(workerGetStoresFromCategory, 0);
+                            setTimeout(workerGetStoresFromCategory, 2000);
                         }
                     },
                     timeout : 999999999,
@@ -182,7 +182,7 @@ jQuery(document).ready(function($){
                         $('#' + storeID + '.store_not_get_coupon').remove();
                         // Count remain
                         $('#messStoreNotGetCoupon').text('Stores remaining: ' + $('.store_not_get_coupon').length);
-                        setTimeout(workerGetCoupons, 0);
+                        setTimeout(workerGetCoupons, 2000);
                     }
                 });
             }

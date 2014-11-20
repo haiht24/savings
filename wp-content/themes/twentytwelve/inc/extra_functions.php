@@ -3,11 +3,8 @@
 	include_once ('load_metadata.php');
     include_once ('load_widgets.php');
 	////////////////////////////////////////////CRAWL FUNCTIONS//////////////////////////////////////////////////////
-    function _get_attachment_id_from_src($guid) {
-        global $wpdb;
-        $query = "SELECT ID FROM {$wpdb->posts} WHERE guid='$guid'";
-        $id = $wpdb->get_var($query);
-        return $id;
+    function getStoreName($storeId) {
+        return get_post_field('post_title', $storeId);
     }
     function getImageType($imgSrc){
         $image_type = explode('/', $imgSrc);
@@ -16,6 +13,8 @@
         return $image_type[1];
     }
     function uploadLogoToServer($imgSrc, $storeName){
+        $imgSrc = explode('?', $imgSrc);
+        $imgSrc = $imgSrc[0];
         $image_type = getImageType($imgSrc);
         $storeName = str_replace(' ', '_', $storeName);
 

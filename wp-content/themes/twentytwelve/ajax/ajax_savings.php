@@ -18,7 +18,7 @@
          die('Can not get HTML content. Plz try again');
      }
 
-     // Find parent class : contain store logo,name and store url
+     // Find parent class : contain name and store url
      $storeDivParent = $html->find('.module-deal');
      $arrStores = array();
      foreach ($storeDivParent as $sp) {
@@ -31,18 +31,13 @@
          foreach ($sp->find('input[name="property-merchant-name"]') as $n) {
              $singleStore['name'] = str_replace("'", "", $n->value);
          }
-         // Store logo
-         foreach ($sp->find('img') as $l) {
-             $logo = explode('?', $l->getAttribute('data-original'));
-             $singleStore['logo'] = $logo[0];
-         }
          array_push($arrStores, $singleStore);
      }
      // Add store to database
      if (count($arrStores) > 0) {
          $numAdded = 0;
          foreach ($arrStores as $s) {
-             $logo = '';
+             //$logo = '';
              if (check_exist_title($s['name']) == 0) {
                  $postArgs = array(
                      'post_title' => $s['name'],
@@ -54,9 +49,6 @@
                      $numAdded++;
                      wp_set_object_terms($newStoreId, array($cat_name), 'store_category');
                      add_post_meta($newStoreId, 'store_url_metadata', $s['url'], true);
-                     // upload logo to server
-                     $logo = uploadLogoToServer($s['logo'], $s['name']);
-                     add_post_meta($newStoreId, 'store_img_metadata', $logo, true);
                  }
              }
          }
@@ -109,6 +101,16 @@
      //     }
      //$html = file_get_html($storeURL);
 
+     // Get store logo
+     $storeLogo = '';
+     foreach ($html->find('div[class="entity-logo"] img') as $a) {
+         $storeLogo = $a->getAttribute('src');
+     }
+     if ($storeLogo) {
+         // upload logo to server
+         $logo = uploadLogoToServer($storeLogo, getStoreName($storeID));
+         add_post_meta($newStoreId, 'store_img_metadata', $logo, true);
+     }
      // Get store description and update to DB
      $storeDesc = $html->find('div[data-id="text-full"]', 0)->plaintext;
      if ($storeDesc) {
