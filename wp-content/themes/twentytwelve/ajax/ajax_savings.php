@@ -37,7 +37,6 @@
      if (count($arrStores) > 0) {
          $numAdded = 0;
          foreach ($arrStores as $s) {
-             //$logo = '';
              if (check_exist_title($s['name']) == 0) {
                  $postArgs = array(
                      'post_title' => $s['name'],
@@ -94,13 +93,6 @@
          die('Can not get Html content. Plz try again');
      }
 
-     //$storeURL = "http://www.savings.com/m-Amazon-coupons.html";
-     //$storeURL = "http://www.savings.com/c-Nightlife-coupons.html";
-     //     if (!file_get_html($storeURL)) {
-     //         die('Error at: ' . $storeURL);
-     //     }
-     //$html = file_get_html($storeURL);
-
      // Get store logo
      $storeLogo = '';
      foreach ($html->find('div[class="entity-logo"] img') as $a) {
@@ -109,7 +101,7 @@
      if ($storeLogo) {
          // upload logo to server
          $logo = uploadLogoToServer($storeLogo, getStoreName($storeID));
-         add_post_meta($newStoreId, 'store_img_metadata', $logo, true);
+         add_post_meta($storeID, 'store_img_metadata', $logo, true);
      }
      // Get store description and update to DB
      $storeDesc = $html->find('div[data-id="text-full"]', 0)->plaintext;
@@ -287,26 +279,51 @@
      echo json_encode(print_cat_not_getted_stores('array'));
  }
  // Reset last number coupon
-
  if ($_POST['action'] == 'reset_lastnumbercoupon') {
      global $wpdb;
      $qr = "DELETE FROM wp_postmeta WHERE meta_key = 'last_number_coupon'";
      $rs = $wpdb->query($qr);
  }
+ // Delete stores
+ if($_POST['action'] == 'deleteStores'){
+    global $wpdb;
+    $qrDelMeta = "
+    DELETE FROM wp_postmeta WHERE post_id IN
+	(SELECT ID FROM wp_posts WHERE post_type='store');
+    ";
+    $qrDelStores = "DELETE FROM wp_posts WHERE post_type='store';";
+    $wpdb->query($qrDelMeta);
+    $wpdb->query($qrDelStores);
+ }
+ // Delete coupons
+ if($_POST['action'] == 'deleteCoupons'){
+    global $wpdb;
+    $qrDelMeta = "
+    DELETE FROM wp_postmeta WHERE post_id IN
+	(SELECT ID FROM wp_posts WHERE post_type='coupon');
+    ";
+    $qrDelCoupons = "DELETE FROM wp_posts WHERE post_type='coupon';";
+    $wpdb->query($qrDelMeta);
+    $wpdb->query($qrDelCoupons);
+ }
  // Process html and add new coupon
  function savings_addNewCoupon($data, $storeId) {
      $cpCode = $data->find('input[class="code"]', 0)->value;
      $cpTitle = trim($data->find('div[class="content"] h3 a', 0)->plaintext);
-     if (check_exist_title($cpTitle) > 0) {
+     $cpTitle = str_replace("'", "", $cpTitle);
+     if (check_exist_coupon_title_origin($cpTitle) > 0) {
          return 0;
      }
      $cpContent = trim(str_replace('more info', '', $data->find('p[class="desc"]', 0)->plaintext));
      $cpContentMore = trim($data->find('div[class="details-full"] p', 0)->plaintext);
      $cpContent .= $cpContentMore;
-     $isFieldExpire = $data->find('ul[class="dates"] li strong', 0)->plaintext;
      $cpExpire = '';
-     if (strpos($isFieldExpire, 'Expires') >= 0) {
-         $cpExpire = trim($data->find('ul[class="dates"] li span', 0)->plaintext);
+     foreach ($data->find('ul[class="dates"] li') as $s) {
+        if(strpos($s->plaintext, 'Expires:')){
+            $cpExpire = $s->plaintext;
+            $cpExpire = trim(str_replace('Expires:', '', $cpExpire));
+            break;
+        }
      }
      // Add new coupon
      $couponArgs = array(
@@ -322,6 +339,8 @@
              add_post_meta($newCouponId, 'coupon_code_metadata', $cpCode, true);
          if ($cpExpire)
              add_post_meta($newCouponId, 'coupon_expire_date_metadata', $cpExpire, true);
+         // Add origin coupon title
+         add_post_meta($newCouponId, 'origin_title_metadata', $cpTitle, true);
      }
      return $newCouponId;
  }
@@ -331,7 +350,8 @@
          $cpCode = $data->find('input[class="code"]', 0)->value;
      }
      $cpTitle = trim($data->find('p[class="title"]', 0)->plaintext);
-     if (check_exist_title($cpTitle) > 0) {
+     $cpTitle = str_replace("'", "", $cpTitle);
+     if (check_exist_coupon_title_origin($cpTitle) > 0) {
          return 0;
      }
      $cpContent = trim($data->find('p[class="desc"]', 0)->plaintext);
@@ -348,6 +368,8 @@
          if ($cpCode)
              add_post_meta($newCouponId, 'coupon_code_metadata', $cpCode, true);
          add_post_meta($newCouponId, 'coupon_expire_date_metadata', 'Expired', true);
+         // Add origin coupon title
+         add_post_meta($newCouponId, 'origin_title_metadata', $cpTitle, true);
      }
      return $newCouponId;
  }

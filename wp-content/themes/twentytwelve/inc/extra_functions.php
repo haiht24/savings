@@ -38,7 +38,7 @@
             $keyword_after_storename_slug = get_option('store_slug');
             if(!$keyword_after_storename_slug)
             {
-                $keyword_after_storename_slug = 'discount codes';
+                $keyword_after_storename_slug = 'coupon codes';
             }
 			if ($keyword_after_storename_slug)
             {
@@ -67,6 +67,16 @@
 		$rs = $wpdb->get_row($qr, 'ARRAY_A');
 		return count($rs);
 	}
+    // CHECK EXIST TITLE FROM COUPON META ORIGIN TITLE
+    function check_exist_coupon_title_origin($title){
+        global $wpdb;
+        $qr = "SELECT post_id FROM wp_postmeta WHERE meta_key = 'origin_title_metadata' AND meta_value = '{$title}'";
+        $rs = $wpdb->get_row($qr, 'ARRAY_A');
+		return count($rs);
+    }
+//    echo check_exist_coupon_title_origin("20% off Any 1 Women's Dress").'<br>';
+//    echo check_exist_coupon_title_origin("25% off Select Men's Sunglasses");
+//    die();
 	// PRINT CATEGORY NOT CHECK
 	function print_category_not_check($returnType = '')
 	{
@@ -413,6 +423,37 @@
                 ?>
                 </p>
                 <p>Coupon Code: <?php echo $cp_code; ?></p>
+                <p>(<?php echo $cp_use_today; ?> used today)</p>
+			</div><!-- .entry-content -->
+        <?php if(current_user_can('edit_post')) echo edit_post_link('Edit Coupon','','',$coupon_id); ?>
+		</article><!-- #post-0 -->
+        <?php
+    }
+    function savings_print_coupon($coupon_id)
+    {
+        $cp_title = get_post_field('post_title', $coupon_id);
+
+        $st_id = get_post_meta($coupon_id, 'store_id_metadata', true);
+        $st_permalink = get_permalink($st_id);
+        $cp_content = get_post_field('post_content', $coupon_id);
+
+        $cp_code = get_post_meta($coupon_id, 'coupon_code_metadata', true);
+        $cp_use_today = get_post_meta($coupon_id, 'use_today_metadata', true);
+        $cp_expire = get_post_meta($coupon_id, 'coupon_expire_date_metadata', true);
+
+        if(!$cp_use_today)
+            $cp_use_today = 1;
+        ?>
+        <article>
+			<header class="entry-header">
+				<h3 class="entry-title"><?php echo $cp_title; ?></h3>
+			</header>
+			<div class="entry-content">
+				<p><?php echo $cp_content; ?></p>
+                <p>Coupon Code: <?php echo $cp_code; ?></p>
+                <?php if($cp_expire): ?>
+                Expire : <?php echo $cp_expire; ?>
+                <?php endif; ?>
                 <p>(<?php echo $cp_use_today; ?> used today)</p>
 			</div><!-- .entry-content -->
         <?php if(current_user_can('edit_post')) echo edit_post_link('Edit Coupon','','',$coupon_id); ?>

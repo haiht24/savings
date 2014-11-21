@@ -72,7 +72,7 @@
     <?php if(current_user_can('edit_post')) echo edit_post_link('Edit Store','','',$post->ID); ?>
 		<div id="content" role="main">
         <a href="" title="<?php echo $store_title; ?>">
-            <img alt="<?php echo $store_title.' logo'; ?>" style="float: left;margin-right: 10px;" src="<?php echo $store_logo; ?>" />
+            <img alt="<?php echo $store_title.' logo'; ?>" style="float: left;margin-right: 10px;width: 100px;height: 50px;" src="<?php echo $store_logo; ?>" />
         </a>
         <h2 style="margin-bottom: 10px;font-size: 2.0em;"><?php echo $store_title; ?> <?php echo date('F Y'); ?></h2>
         <p>
@@ -85,7 +85,7 @@
         {
             foreach($arr_coupons as $c)
             {
-                cpx_print_coupon($c['cp_id']);
+                savings_print_coupon($c['cp_id']);
             }
         }
         ?>

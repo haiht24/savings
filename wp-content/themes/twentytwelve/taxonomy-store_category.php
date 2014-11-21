@@ -70,7 +70,7 @@
     <article>
 		<header class="entry-header">
             <a title="<?php echo $st_title; ?>" href="<?php echo $st_permalink; ?>">
-                <img alt="<?php echo $st_title . ' logo'; ?>" src="<?php echo $st_logo; ?>" />
+                <img alt="<?php echo $st_title . ' logo'; ?>" src="<?php echo $st_logo; ?>" style="width: 100px;height: 50px;" />
             </a>
 			<h3 class="entry-title"><?php echo $st_alter_title; ?></h3>
 		</header>

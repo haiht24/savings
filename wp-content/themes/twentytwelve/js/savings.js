@@ -230,6 +230,29 @@ jQuery(document).ready(function($){
                 }
             });
         })
+        // Delete stores
+        $('#btnDelStore').click(function(){
+            $.ajax({
+                type: 'POST',
+                url: tempDirUri + "/ajax/ajax_savings.php",
+                data: {action : 'deleteStores'},
+                success: function(rs) {
+                    $(this).val('Deleted all stores');
+                }
+            });
+        })
+        // Delete coupons
+        $('#btnDelCoupon').click(function(){
+            $.ajax({
+                type: 'POST',
+                url: tempDirUri + "/ajax/ajax_savings.php",
+                data: {action : 'deleteCoupons'},
+                success: function(rs) {
+                    console.log(rs);
+                    $(this).val('Deleted all coupons');
+                }
+            });
+        })
         // Test
         $('#btnTest').click(function(){
             loadCategoryNotGetStores();

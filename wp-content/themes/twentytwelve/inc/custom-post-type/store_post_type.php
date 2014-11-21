@@ -6,7 +6,7 @@
 		register_taxonomy('store_category', array('store'), array(
 			'label' => __('Store Categories'),
 			'show_ui' => true,
-			'rewrite' => array('slug' => 'discounts'),
+			'rewrite' => array('slug' => 'coupons'),
 			'hierarchical' => true));
 		// REGISTER STORE CUSTOM POST TYPE
 		register_post_type('store', array(

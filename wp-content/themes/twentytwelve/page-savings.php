@@ -14,10 +14,9 @@ body {margin: 10px;}
     var tempDirUri = '<?php echo get_template_directory_uri() ?>';
 </script>
 <div id="control">
-<input type="button" value="test" id="btnTest" />
+    <!-- <input type="button" value="test" id="btnTest" /> -->
     <input type="button" id="btnGetCategories" value="Get Categories" />
     <input type="text" id="txtKeywordAfterSlug" value="-coupon-codes" placeholder="eg: -coupon-codes" />
-    <input type="button" id="btnRSGetCategory" value="Reset check get child categories" />
     <input type="button" id="fastGetCat" value="Fast check get cat" />
 <hr />
     <input type="button" id="btnLoadCatNotGetStores" value="Load Categories Not Get Store" />
@@ -27,8 +26,12 @@ body {margin: 10px;}
     <input type="button" id="btnLoadStores" value="Load Stores Not Get Coupons" />
     <input type="button" id="btnGetCoupons" value="Get Coupons" />
 <hr />
+    <input type="button" id="btnRSGetCategory" value="(Cat)Reset check get child categories" />
     <input type="button" id="btnResetIsGetCoupon" value="(Store)Reset is get coupon" />
     <input type="button" id="btnResetLastNumberCoupon" value="(Store)Reset value last number coupon" />
+<hr />
+    <input type="button" id="btnDelStore" value="Delete All Stores" />
+    <input type="button" id="btnDelCoupon" value="Delete All Coupons" />
 </div>
 <label id="messStoreNotGetCoupon"></label>
 <div id="storeNotGetCoupon" style='height: 200px; overflow-y: scroll;'></div>

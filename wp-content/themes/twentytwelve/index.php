@@ -17,7 +17,7 @@ if($rs != 0):
 ?>
 	<div id="primary" class="site-content">
 		<div id="content" role="main">
-        <h2 style="margin-bottom: 10px;font-size: 2.0em;">Today's top discount codes <?php echo the_date('F Y'); ?></h2>
+        <h2 style="margin-bottom: 10px;font-size: 2.0em;">Today's top coupons codes <?php echo the_date('F Y'); ?></h2>
         <?php foreach($rs as $r):
         // Store info
         $st_title = get_post_field('post_title', $r['st_id']);
@@ -39,7 +39,7 @@ if($rs != 0):
             <article>
 				<header class="entry-header">
                     <a title="<?php echo $st_title; ?>" href="<?php echo $st_permalink; ?>">
-                        <img alt="<?php echo $st_title.' logo'?>" src="<?php echo $st_logo; ?>" />
+                        <img alt="<?php echo $st_title.' logo'?>" src="<?php echo $st_logo; ?>" style="width: 100px;height: 50px;" />
                     </a>
 					<h3 class="entry-title"><?php echo $st_title; ?></h3>
 				</header>
