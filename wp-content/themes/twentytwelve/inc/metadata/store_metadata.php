@@ -76,4 +76,13 @@
 					'choices' => '')
                     ));
 		ot_register_meta_box($store_meta_box);
+        $couponOfStore = array(
+			'id' => 'box_couponOfStore',
+			'title' => 'Coupons of this store',
+			'desc' => '',
+			'pages' => array('store'),
+			'context' => 'normal',
+			'priority' => 'high',
+			'fields' => array());
+        ot_register_meta_box($couponOfStore);
 	}

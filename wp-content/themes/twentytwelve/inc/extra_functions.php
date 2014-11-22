@@ -253,6 +253,9 @@
 		{
 			wp_enqueue_script('jquery_coupon_page', get_template_directory_uri() .
 				'/ajax/admin/admin_coupon.js');
+		}else if($parent_file == 'edit.php?post_type=store'){
+			wp_enqueue_script('jquery_store_page', get_template_directory_uri() .
+				'/ajax/admin/admin_store.js');
 		}
 	}
 	add_filter('admin_head', 'add_jquery_admin');

@@ -6,10 +6,23 @@
  if ($_POST['action'] == 'get_store') {
      $homeUrl = "http://savings.com";
      $cat_id = $_POST['cat_id'];
-     //$cat_id = 760;
      $currentPageNumber = $_POST['pageNum'];
+     $t = get_term_by('id', $cat_id, 'store_category');
 
+     //$cat_id = 702;
      $catUrl = get_tax_meta($cat_id, 'category_url');
+     // If empty cat URL, create custom url using cat name
+     if(!$catUrl){
+        $createCatSlug = str_replace(",", "-", $t->name);
+        $createCatSlug = str_replace("'", "", $createCatSlug);
+        $createCatSlug = str_replace("&", "and", $createCatSlug);
+        $createCatSlug = str_replace(" ", "-", $createCatSlug);
+        $catUrl = "http://www.savings.com/c-{$createCatSlug}-coupons.html";
+     }
+     if(!$catUrl){
+        die('Empty category URL with ID = ' . $cat_id);
+     }
+
      $catUrl = str_replace('.html', '', $catUrl);
      $catUrl = $catUrl . '-' . $currentPageNumber . '.html';
      $html = file_get_html($catUrl);
@@ -47,7 +60,7 @@
                  if ($newStoreId) {
                      $numAdded++;
                      array_push($arrNewStores, '(' . $cat_id . ' | ' . $s['name'] . ')');
-                     $t = get_term_by('id', $cat_id, 'store_category');
+
                      if ($t) {
                          wp_set_object_terms($newStoreId, array($t->name), 'store_category');
                      }
@@ -76,11 +89,17 @@
      $arrStores = savings_printStoresNotGetCoupons();
      echo json_encode($arrStores);
  }
+ if($_POST['action'] == 'test'){
+    $storeURL = 'http://www.retailmenot.com';
+    $html = file_get_html($storeURL);
+    echo $html;
+ }
  // GET COUPONS
  if ($_POST['action'] == 'getCoupons') {
      $c = 0;
      $storeID = $_POST['storeID'];
      $storeURL = $_POST['storeURL'];
+     //$storeURL = 'http://www.retailmenot.com/view/amazon.com';
      //$storeURL = 'http://www.savings.com/m-Kmart-coupons.html';
      //$storeURL = 'http://www.savings.com/m-SuperStarTickets-coupons.html';
      $last_number_coupon = get_post_meta($storeID, 'last_number_coupon', true);

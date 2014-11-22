@@ -259,6 +259,14 @@ jQuery(document).ready(function($){
         })
         // Test
         $('#btnTest').click(function(){
-            loadCategoryNotGetStores();
+            $.ajax({
+                type: 'POST',
+                url: tempDirUri + "/ajax/ajax_savings.php",
+                data: {action : 'test'},
+                success: function(rs) {
+                    alert(rs);
+                    $('#result').append(rs);
+                }
+            });
         })
     })

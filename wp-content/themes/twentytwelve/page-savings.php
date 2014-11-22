@@ -14,7 +14,9 @@ body {margin: 10px;}
     var tempDirUri = '<?php echo get_template_directory_uri() ?>';
 </script>
 <div id="control">
-    <!-- <input type="button" value="test" id="btnTest" /> -->
+    <!--  -->
+
+    <input type="button" value="test" id="btnTest" />
     <input type="button" id="btnGetCategories" value="Get Categories" />
     <input type="text" id="txtKeywordAfterSlug" value="-coupon-codes" placeholder="eg: -coupon-codes" />
     <input type="button" id="fastGetCat" value="Fast check get cat" />
