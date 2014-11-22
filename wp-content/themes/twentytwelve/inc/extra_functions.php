@@ -142,7 +142,8 @@
 				$vl = get_tax_meta($t->term_id, 'already_get_store');
 				if ($vl == '')
 				{
-					$ip = "<input class='catNotGetStore' id='{$t->term_id}' value='{$t->name}' type='hidden'>";
+					//$ip = "<input class='catNotGetStore' id='{$t->term_id}' value='{$t->name}' type='hidden'>";
+                    $ip = "<input class='catNotGetStore' id='{$t->term_id}' type='hidden'>";
                     if($returnType == 'array')
                         array_push($arr, $ip);
                     else

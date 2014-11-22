@@ -95,18 +95,22 @@ jQuery(document).ready(function($){
                     data: {action : 'get_store', pageNum : $('#currentPage').val(), cat_id : cat_id, cat_name : cat_name},
                     dataType : 'json',
                     success: function(rs) {
-                        if(parseInt(rs['isNext']) == 0){
+                        // If category page has next button and not has a DISABLE next button
+                        if(parseInt(rs['isNext']) == 0 && parseInt('hasNextButton') == 1){
                             console.log(rs['numAdded']);
                             nextPage = parseInt(rs['currentPageNumber']) + 1;
                             $('#currentPage').val(nextPage);
                             setTimeout(workerGetStoresFromCategory, 2000);
-                        }else // if is last page
+                        }
+                        // if is last page OR If category has only 1 page
+                        else if((parseInt(rs['isNext']) == 1) || (parseInt('hasNextButton') == 0 || parseInt(rs['isNext']) == 0))
                         {
                             $('#' + cat_id + '.catNotGetStore').remove();
                             $('#currentPage').val(1);
                             $('#btnLoadCatNotGetStores').val('Load Categories Not Get Store (remain: ' + $('.catNotGetStore').length + ')');
                             setTimeout(workerGetStoresFromCategory, 2000);
                         }
+
                     },
                     timeout : 999999999,
                     complete: function() {

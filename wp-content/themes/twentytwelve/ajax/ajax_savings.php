@@ -6,13 +6,11 @@
  if ($_POST['action'] == 'get_store') {
      $homeUrl = "http://savings.com";
      $cat_id = $_POST['cat_id'];
-     $cat_name = $_POST['cat_name'];
      $currentPageNumber = $_POST['pageNum'];
 
      $catUrl = get_tax_meta($cat_id, 'category_url');
      $catUrl = str_replace('.html', '', $catUrl);
      $catUrl = $catUrl . '-' . $currentPageNumber . '.html';
-
      $html = file_get_html($catUrl);
      if (!$html) {
          die('Can not get HTML content. Plz try again');
@@ -46,17 +44,22 @@
                  // Add store metadata
                  if ($newStoreId) {
                      $numAdded++;
-                     wp_set_object_terms($newStoreId, array($cat_name), 'store_category');
+                     $t = get_term_by('id', $cat_id, 'store_category');
+                     if ($t)
+                         wp_set_object_terms($newStoreId, array($t->name), 'store_category');
                      add_post_meta($newStoreId, 'store_url_metadata', $s['url'], true);
                  }
              }
          }
      }
      $result = array();
+     $hasNextButton = sizeof($html->find('a[class="button next"]'));
+     $result['hasNextButton'] = $hasNextButton;
      $result['isNext'] = sizeof($html->find('a[class="button next disabled"]'));
      $result['currentPageNumber'] = $currentPageNumber;
      $result['numAdded'] = $numAdded;
-     if ($result['isNext'] == 1) {
+
+     if (($result['isNext'] == 1 || $hasNextButton == 0) || $hasNextButton == 0) {
          // Mark as getted stores
          $tax_meta = new Tax_Meta_Class(array());
          $tax_meta->save_field($cat_id, array('id' => 'already_get_store'), '', 'yes');
@@ -218,6 +221,7 @@
 
      if (sizeof($catsContainer)) {
          foreach ($catsContainer as $c) {
+             $catName = '';
              $catName = str_replace('&ndash;', '', $c->plaintext);
              $catName = str_replace('&nbsp;', '', $catName);
              $catName = strip_tags(trim($catName));
@@ -285,26 +289,26 @@
      $rs = $wpdb->query($qr);
  }
  // Delete stores
- if($_POST['action'] == 'deleteStores'){
-    global $wpdb;
-    $qrDelMeta = "
+ if ($_POST['action'] == 'deleteStores') {
+     global $wpdb;
+     $qrDelMeta = "
     DELETE FROM wp_postmeta WHERE post_id IN
 	(SELECT ID FROM wp_posts WHERE post_type='store');
     ";
-    $qrDelStores = "DELETE FROM wp_posts WHERE post_type='store';";
-    $wpdb->query($qrDelMeta);
-    $wpdb->query($qrDelStores);
+     $qrDelStores = "DELETE FROM wp_posts WHERE post_type='store';";
+     $wpdb->query($qrDelMeta);
+     $wpdb->query($qrDelStores);
  }
  // Delete coupons
- if($_POST['action'] == 'deleteCoupons'){
-    global $wpdb;
-    $qrDelMeta = "
+ if ($_POST['action'] == 'deleteCoupons') {
+     global $wpdb;
+     $qrDelMeta = "
     DELETE FROM wp_postmeta WHERE post_id IN
 	(SELECT ID FROM wp_posts WHERE post_type='coupon');
     ";
-    $qrDelCoupons = "DELETE FROM wp_posts WHERE post_type='coupon';";
-    $wpdb->query($qrDelMeta);
-    $wpdb->query($qrDelCoupons);
+     $qrDelCoupons = "DELETE FROM wp_posts WHERE post_type='coupon';";
+     $wpdb->query($qrDelMeta);
+     $wpdb->query($qrDelCoupons);
  }
  // Process html and add new coupon
  function savings_addNewCoupon($data, $storeId) {
@@ -319,11 +323,11 @@
      $cpContent .= $cpContentMore;
      $cpExpire = '';
      foreach ($data->find('ul[class="dates"] li') as $s) {
-        if(strpos($s->plaintext, 'Expires:')){
-            $cpExpire = $s->plaintext;
-            $cpExpire = trim(str_replace('Expires:', '', $cpExpire));
-            break;
-        }
+         if (strpos($s->plaintext, 'Expires:')) {
+             $cpExpire = $s->plaintext;
+             $cpExpire = trim(str_replace('Expires:', '', $cpExpire));
+             break;
+         }
      }
      // Add new coupon
      $couponArgs = array(
