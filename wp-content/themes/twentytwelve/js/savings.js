@@ -96,21 +96,21 @@ jQuery(document).ready(function($){
                     dataType : 'json',
                     success: function(rs) {
                         // If category page has next button and not has a DISABLE next button
-                        if(parseInt(rs['isNext']) == 0 && parseInt('hasNextButton') == 1){
-                            console.log(rs['numAdded']);
+                        if(parseInt(rs['hasDisableNextButton']) == 0 && parseInt(rs['hasNextButton']) == 1){
+                            console.log(rs['numAdded'] + ' new stores added:' + rs['newStores']);
                             nextPage = parseInt(rs['currentPageNumber']) + 1;
                             $('#currentPage').val(nextPage);
                             setTimeout(workerGetStoresFromCategory, 2000);
                         }
                         // if is last page OR If category has only 1 page
-                        else if((parseInt(rs['isNext']) == 1) || (parseInt('hasNextButton') == 0 || parseInt(rs['isNext']) == 0))
+                        else if((parseInt(rs['hasDisableNextButton']) == 1) || (parseInt(rs['hasNextButton']) == 0 && parseInt(rs['hasDisableNextButton']) == 0))
                         {
+                            console.log(rs['numAdded'] + ' new stores added:' + rs['newStores']);
                             $('#' + cat_id + '.catNotGetStore').remove();
                             $('#currentPage').val(1);
                             $('#btnLoadCatNotGetStores').val('Load Categories Not Get Store (remain: ' + $('.catNotGetStore').length + ')');
                             setTimeout(workerGetStoresFromCategory, 2000);
                         }
-
                     },
                     timeout : 999999999,
                     complete: function() {

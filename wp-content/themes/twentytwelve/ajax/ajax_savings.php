@@ -6,6 +6,7 @@
  if ($_POST['action'] == 'get_store') {
      $homeUrl = "http://savings.com";
      $cat_id = $_POST['cat_id'];
+     //$cat_id = 760;
      $currentPageNumber = $_POST['pageNum'];
 
      $catUrl = get_tax_meta($cat_id, 'category_url');
@@ -32,6 +33,7 @@
          array_push($arrStores, $singleStore);
      }
      // Add store to database
+     $arrNewStores = array();
      if (count($arrStores) > 0) {
          $numAdded = 0;
          foreach ($arrStores as $s) {
@@ -44,9 +46,11 @@
                  // Add store metadata
                  if ($newStoreId) {
                      $numAdded++;
+                     array_push($arrNewStores, '(' . $cat_id . ' | ' . $s['name'] . ')');
                      $t = get_term_by('id', $cat_id, 'store_category');
-                     if ($t)
+                     if ($t) {
                          wp_set_object_terms($newStoreId, array($t->name), 'store_category');
+                     }
                      add_post_meta($newStoreId, 'store_url_metadata', $s['url'], true);
                  }
              }
@@ -55,11 +59,11 @@
      $result = array();
      $hasNextButton = sizeof($html->find('a[class="button next"]'));
      $result['hasNextButton'] = $hasNextButton;
-     $result['isNext'] = sizeof($html->find('a[class="button next disabled"]'));
+     $result['hasDisableNextButton'] = sizeof($html->find('a[class="button next disabled"]'));
      $result['currentPageNumber'] = $currentPageNumber;
      $result['numAdded'] = $numAdded;
-
-     if (($result['isNext'] == 1 || $hasNextButton == 0) || $hasNextButton == 0) {
+     $result['newStores'] = $arrNewStores;
+     if ($result['hasDisableNextButton'] == 1 || $hasNextButton == 0) {
          // Mark as getted stores
          $tax_meta = new Tax_Meta_Class(array());
          $tax_meta->save_field($cat_id, array('id' => 'already_get_store'), '', 'yes');
