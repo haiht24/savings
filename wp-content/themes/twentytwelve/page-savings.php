@@ -1,11 +1,12 @@
 <?php
-//	if (!in_array(cpx_get_user_role_name(), array('administrator')))
-//	{
-//		die('You do not have permission to access this page!');
-//	}
+	if (!in_array(cpx_get_user_role_name(), array('administrator')))
+	{
+		die('You do not have permission to access this page!');
+	}
     wp_head();
     wp_enqueue_script('savings', get_template_directory_uri() . '/js/savings.js');
 ?>
+<title>Crawler</title>
 <style type="text/css">
 body {margin: 10px;}
 .reset{color:blue;}
@@ -14,7 +15,9 @@ body {margin: 10px;}
     var tempDirUri = '<?php echo get_template_directory_uri() ?>';
 </script>
 <div id="control">
+<!--
     <input type="button" value="test" id="btnTest" />
+-->
     <input type="button" id="btnGetCategories" value="Get Categories" />
     <input type="text" id="txtKeywordAfterSlug" value="-coupon-codes" placeholder="eg: -coupon-codes" />
     <input type="button" id="fastGetCat" value="Fast check get cat" />
@@ -29,9 +32,12 @@ body {margin: 10px;}
     <input type="button" id="btnRSGetCategory" value="(Cat)Reset check get child categories" />
     <input type="button" id="btnResetIsGetCoupon" value="(Store)Reset is get coupon" />
     <input type="button" id="btnResetLastNumberCoupon" value="(Store)Reset value last number coupon" />
+<?php
+ if(strpos(home_url(), 'localhost') >= 0): ?>
 <hr />
     <input type="button" id="btnDelStore" value="Delete All Stores" />
     <input type="button" id="btnDelCoupon" value="Delete All Coupons" />
+<?php endif; ?>
 </div>
 <label id="messStoreNotGetCoupon"></label>
 <div id="storeNotGetCoupon" style='height: 200px; overflow-y: scroll;'></div>

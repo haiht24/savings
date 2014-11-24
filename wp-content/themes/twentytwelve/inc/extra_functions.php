@@ -3,6 +3,18 @@
 	include_once ('load_metadata.php');
     include_once ('load_widgets.php');
 	////////////////////////////////////////////CRAWL FUNCTIONS//////////////////////////////////////////////////////
+    // Update coupons to specify Author Id
+    function updateCouponAuthor($storeId, $authorId){
+        global $wpdb;
+        $qrGetCouponsOfStore = "SELECT post_id FROM wp_postmeta WHERE meta_key = 'store_id_metadata' AND meta_value = {$storeId}";
+        $rs = $wpdb->get_results($qrGetCouponsOfStore);
+        if(count($rs) > 0){
+            foreach ($rs as $r) {
+                $qrUpdateCouponAuthor = "update wp_posts set post_author = {$authorId} where ID = {$r->post_id}";
+                $wpdb->query($qrUpdateCouponAuthor);
+            }
+        }
+    }
     function getStoreName($storeId) {
         return get_post_field('post_title', $storeId);
     }
@@ -133,18 +145,26 @@
 			'hide_empty' => 0,
 			'orderby' => 'id',
 			'order' => 'ASC'));
+        $arr = array();
 		if (count($terms) > 0)
 		{
-            $arr = array();
 			foreach ($terms as $t)
 			{
 				$url = get_tax_meta($t->term_id, 'category_url');
                 if(!$url){
-                    array_push($arr, $t->term_id . ' | ' . $t->name);
+                    $catUrl = str_replace(" ", "-", $t->name);
+                    $catUrl = str_replace("'", "", $catUrl);
+                    $catUrl = "http://www.savings.com/c-{$catUrl}-coupons.html";
+
+                    $tax_meta = new Tax_Meta_Class(array());
+                    $tax_meta->save_field($t->term_id, array('id' => 'category_url'), '', $catUrl);
+                    array_push($arr, $t->term_id . ' : ' . $t->name . ' : ' . $catUrl);
                 }
 			}
 		}
-        var_dump($arr);
+        if(count($arr) > 0){
+            var_dump($arr);
+        }
 	}
 	// PRINT CATEGORY NOT PARENTING
 	function print_cat_not_parenting()
