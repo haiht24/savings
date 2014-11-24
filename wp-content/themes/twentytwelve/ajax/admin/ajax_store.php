@@ -12,6 +12,11 @@
         foreach ($rs as $c) {
             $couponTitle = get_post_field('post_title', $c->ID);
             $couponStatus = get_post_field('post_status', $c->ID);
+            $couponExpire = get_post_meta($c->ID, 'coupon_expire_date_metadata', true);
+            $showExpire = '';
+            if($couponExpire == 'Expired'){
+                $showExpire = '(Expired)';
+            }
             $color = '';
             if($couponStatus == 'draft'){
                 $color = "style='color:grey'";
@@ -20,7 +25,7 @@
             }
             $couponTitle = str_replace("'", "", $couponTitle);
             $editLink = get_edit_post_link($c->ID);
-            $link = "<a target = '_blank' href='{$editLink}' title = '{$couponStatus}' {$color} >{$couponTitle}</a>";
+            $link = "<a target = '_blank' href='{$editLink}' title = '{$couponStatus}' {$color} >{$couponTitle}</a> {$showExpire}";
             array_push($arrCoupons, $link);
         }
     }

@@ -9,18 +9,17 @@
      $currentPageNumber = $_POST['pageNum'];
      $t = get_term_by('id', $cat_id, 'store_category');
 
-     //$cat_id = 702;
      $catUrl = get_tax_meta($cat_id, 'category_url');
      // If empty cat URL, create custom url using cat name
-     if(!$catUrl){
-        $createCatSlug = str_replace(",", "-", $t->name);
-        $createCatSlug = str_replace("'", "", $createCatSlug);
-        $createCatSlug = str_replace("&", "and", $createCatSlug);
-        $createCatSlug = str_replace(" ", "-", $createCatSlug);
-        $catUrl = "http://www.savings.com/c-{$createCatSlug}-coupons.html";
+     if (!$catUrl) {
+         $createCatSlug = str_replace(",", "-", $t->name);
+         $createCatSlug = str_replace("'", "", $createCatSlug);
+         $createCatSlug = str_replace("&", "and", $createCatSlug);
+         $createCatSlug = str_replace(" ", "-", $createCatSlug);
+         $catUrl = "http://www.savings.com/c-{$createCatSlug}-coupons.html";
      }
-     if(!$catUrl){
-        die('Empty category URL with ID = ' . $cat_id);
+     if (!$catUrl) {
+         die('Empty category URL with ID = ' . $cat_id);
      }
 
      $catUrl = str_replace('.html', '', $catUrl);
@@ -89,19 +88,19 @@
      $arrStores = savings_printStoresNotGetCoupons();
      echo json_encode($arrStores);
  }
- if($_POST['action'] == 'test'){
-    $storeURL = 'http://www.retailmenot.com';
-    $html = file_get_html($storeURL);
-    echo $html;
+ if ($_POST['action'] == 'test') {
+     printCatNotHaveUrl();
  }
  // GET COUPONS
  if ($_POST['action'] == 'getCoupons') {
      $c = 0;
      $storeID = $_POST['storeID'];
+     $storeName = get_post_field('post_title', $storeID);
      $storeURL = $_POST['storeURL'];
      //$storeURL = 'http://www.retailmenot.com/view/amazon.com';
      //$storeURL = 'http://www.savings.com/m-Kmart-coupons.html';
      //$storeURL = 'http://www.savings.com/m-SuperStarTickets-coupons.html';
+     //$storeURL = 'http://www.savings.com/m-Sticky-Jewelry-coupons.html';
      $last_number_coupon = get_post_meta($storeID, 'last_number_coupon', true);
 
      $curl = curl_init();
@@ -115,10 +114,10 @@
      curl_close($curl);
      $html = new simple_html_dom();
      $html->load($str);
+
      if (!$html) {
          die('Can not get Html content. Plz try again');
      }
-
      // Get store logo
      $storeLogo = '';
      foreach ($html->find('div[class="entity-logo"] img') as $a) {
@@ -162,13 +161,13 @@
       * GET COUPONS OF STORE
       */
      // If store have new coupons
-     $countCurrentCoupons = count($html->find('div[class="hasCode"]'));
+     $countCurrentCoupons = count($html->find('.hasCode'));
      if ($last_number_coupon) {
          if ($last_number_coupon < $countCurrentCoupons) {
              $number_new_coupon = $countCurrentCoupons - $last_number_coupon;
              for ($i = 0; $i < $number_new_coupon; $i++) {
-                 $divNewCoupon = $html->find('div[class="hasCode"]', $i);
-                 if (savings_addNewCoupon($divNewCoupon, $storeID) > 0) {
+                 $divNewCoupon = $html->find('.hasCode', $i);
+                 if (savings_addNewCoupon($divNewCoupon, $storeID, $storeName) > 0) {
                      $c++;
                  }
              }
@@ -178,8 +177,8 @@
              //return;
          }
      } else { // First time get coupons
-         foreach ($html->find('div[class="hasCode"]') as $div) {
-             if (savings_addNewCoupon($div, $storeID) > 0) {
+         foreach ($html->find('.hasCode') as $div) {
+             if (savings_addNewCoupon($div, $storeID, $storeName) > 0) {
                  $c++;
              }
          }
@@ -334,11 +333,18 @@
      $wpdb->query($qrDelCoupons);
  }
  // Process html and add new coupon
- function savings_addNewCoupon($data, $storeId) {
+ function savings_addNewCoupon($data, $storeId, $storeName = '') {
+     //$storeName = 'Sticky Jewelry';
+     $merchantName = trim($data->find('input[name="property-merchant-name"]', 0)->value);
+     //echo $merchantName . ' vs ' . $storeName . ' | ';
+     if (strpos($storeName, $merchantName) != false) {
+         return;
+     }
+
      $cpCode = $data->find('input[class="code"]', 0)->value;
      $cpTitle = trim($data->find('div[class="content"] h3 a', 0)->plaintext);
      $cpTitle = str_replace("'", "", $cpTitle);
-     if (check_exist_coupon_title_origin($cpTitle) > 0) {
+     if (check_exist_coupon_title_origin($cpTitle, $cpCode, $storeId) > 0) {
          return 0;
      }
      $cpContent = trim(str_replace('more info', '', $data->find('p[class="desc"]', 0)->plaintext));
@@ -376,9 +382,12 @@
      if (sizeof($data->find('div[class="wrapper-code-reveal"]'))) {
          $cpCode = $data->find('input[class="code"]', 0)->value;
      }
+     if (!$cpCode) {
+         return;
+     }
      $cpTitle = trim($data->find('p[class="title"]', 0)->plaintext);
      $cpTitle = str_replace("'", "", $cpTitle);
-     if (check_exist_coupon_title_origin($cpTitle) > 0) {
+     if (check_exist_coupon_title_origin($cpTitle, $cpCode, $storeId) > 0) {
          return 0;
      }
      $cpContent = trim($data->find('p[class="desc"]', 0)->plaintext);

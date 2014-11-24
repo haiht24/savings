@@ -179,7 +179,9 @@ jQuery(document).ready(function($){
                     url: tempDirUri + "/ajax/ajax_savings.php",
                     data: {action : 'getCoupons',storeID : storeID, storeURL : storeURL},
                     success: function(rs) {
+                        //console.log(rs);
                         console.log(rs + ' new active coupons added');
+                        //$('#result').html(rs);
                     },
                     timeout : 999999999,
                     complete: function() {
@@ -263,9 +265,9 @@ jQuery(document).ready(function($){
                 type: 'POST',
                 url: tempDirUri + "/ajax/ajax_savings.php",
                 data: {action : 'test'},
+                //dataType : 'json',
                 success: function(rs) {
-                    alert(rs);
-                    $('#result').append(rs);
+                    console.log(rs);
                 }
             });
         })

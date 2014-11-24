@@ -68,15 +68,36 @@
 		return count($rs);
 	}
     // CHECK EXIST TITLE FROM COUPON META ORIGIN TITLE
-    function check_exist_coupon_title_origin($title){
-        global $wpdb;
-        $qr = "SELECT post_id FROM wp_postmeta WHERE meta_key = 'origin_title_metadata' AND meta_value = '{$title}'";
-        $rs = $wpdb->get_row($qr, 'ARRAY_A');
-		return count($rs);
+    function check_exist_coupon_title_origin($couponTitle, $couponCode, $storeId)
+    {
+        $args = array(
+        	'numberposts' => -1,
+        	'post_type' => 'coupon',
+            'post_status' => array('publish','pending','draft'),
+        	'meta_query' => array(
+        		'relation' => 'AND',
+        		array(
+        			'key' => 'origin_title_metadata',
+        			'value' => $couponTitle,
+        			'compare' => '='
+        		),
+        		array(
+        			'key' => 'coupon_code_metadata',
+        			'value' => $couponCode,
+        			//'type' => 'NUMERIC',
+                    //'compare' => '>'
+        			'compare' => '='
+        		),
+                array(
+                    'key' => 'store_id_metadata',
+                    'value' => $storeId,
+                    'compare' => '='
+                )
+        	)
+        );
+        $the_query = new WP_Query( $args );
+        return $the_query->post_count;
     }
-//    echo check_exist_coupon_title_origin("20% off Any 1 Women's Dress").'<br>';
-//    echo check_exist_coupon_title_origin("25% off Select Men's Sunglasses");
-//    die();
 	// PRINT CATEGORY NOT CHECK
 	function print_category_not_check($returnType = '')
 	{
@@ -105,6 +126,25 @@
                 return $arr;
             }
 		}
+	}
+    function printCatNotHaveUrl()
+	{
+		$terms = get_terms('store_category', array(
+			'hide_empty' => 0,
+			'orderby' => 'id',
+			'order' => 'ASC'));
+		if (count($terms) > 0)
+		{
+            $arr = array();
+			foreach ($terms as $t)
+			{
+				$url = get_tax_meta($t->term_id, 'category_url');
+                if(!$url){
+                    array_push($arr, $t->term_id . ' | ' . $t->name);
+                }
+			}
+		}
+        var_dump($arr);
 	}
 	// PRINT CATEGORY NOT PARENTING
 	function print_cat_not_parenting()
