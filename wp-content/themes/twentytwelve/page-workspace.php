@@ -12,13 +12,23 @@
     var currentUserId = '<?php echo get_current_user_id() ?>';
 </script>
 <style type="text/css">
-    body {margin: 10px;}
-    .reset{color:blue;}
+    .wrap-main{width: 100%;}
+    .div-right{width: 30%; float: right;border-left: 1px solid white; padding: 10px;}
+    .div-right a{line-height: 20px; text-decoration: none;}
+    .div-center{width: 65%; float: left;border-right: none; padding: 10px;}
 </style>
-<div>
-    <label for="numberPost">Number of posts</label>
-    <input id="numberPost" value="10" placeholder="Enter number of random stores" />
-    <button id="btnGetRandomStores">Get Random Stores</button>
+<div class="wrap-main">
+<!-- Center -->
+    <div class="div-center">
+        <label for="numberPost">Number of posts</label>
+        <input id="numberPost" value="10" placeholder="Enter number of random stores" />
+        <button id="btnGetRandomStores">Get Random Stores</button><span id="mess"></span>
+    </div>
+<!-- Right -->
+    <div class="div-right">
+    <h1>Mine<span id="number"></span></h1>
+    <div id="mine" style='height: 500px; overflow-y: scroll;'></div>
+    </div>
 </div>
 
 <?php wp_footer(); ?>

@@ -101,6 +101,7 @@
      //$storeURL = 'http://www.savings.com/m-Kmart-coupons.html';
      //$storeURL = 'http://www.savings.com/m-SuperStarTickets-coupons.html';
      //$storeURL = 'http://www.savings.com/m-Sticky-Jewelry-coupons.html';
+     //$storeURL = 'http://www.savings.com/m-GrowThink-coupons.html';
      $last_number_coupon = get_post_meta($storeID, 'last_number_coupon', true);
 
      $curl = curl_init();
@@ -331,82 +332,5 @@
      $qrDelCoupons = "DELETE FROM wp_posts WHERE post_type='coupon';";
      $wpdb->query($qrDelMeta);
      $wpdb->query($qrDelCoupons);
- }
- // Process html and add new coupon
- function savings_addNewCoupon($data, $storeId, $storeName = '') {
-     //$storeName = 'Sticky Jewelry';
-     $merchantName = trim($data->find('input[name="property-merchant-name"]', 0)->value);
-     //echo $merchantName . ' vs ' . $storeName . ' | ';
-     if (strpos($storeName, $merchantName) != false) {
-         return;
-     }
-
-     $cpCode = $data->find('input[class="code"]', 0)->value;
-     $cpTitle = trim($data->find('div[class="content"] h3 a', 0)->plaintext);
-     $cpTitle = str_replace("'", "", $cpTitle);
-     if (check_exist_coupon_title_origin($cpTitle, $cpCode, $storeId) > 0) {
-         return 0;
-     }
-     $cpContent = trim(str_replace('more info', '', $data->find('p[class="desc"]', 0)->plaintext));
-     $cpContentMore = trim($data->find('div[class="details-full"] p', 0)->plaintext);
-     $cpContent .= $cpContentMore;
-     $cpExpire = '';
-     foreach ($data->find('ul[class="dates"] li') as $s) {
-         if (strpos($s->plaintext, 'Expires:')) {
-             $cpExpire = $s->plaintext;
-             $cpExpire = trim(str_replace('Expires:', '', $cpExpire));
-             break;
-         }
-     }
-     // Add new coupon
-     $couponArgs = array(
-         'post_title' => $cpTitle,
-         'post_content' => $cpContent,
-         'post_type' => 'coupon',
-         'post_status' => 'pending');
-     $newCouponId = wp_insert_post($couponArgs);
-     // Add coupon meta
-     if ($newCouponId > 0) {
-         add_post_meta($newCouponId, 'store_id_metadata', $storeId, true);
-         if ($cpCode)
-             add_post_meta($newCouponId, 'coupon_code_metadata', $cpCode, true);
-         if ($cpExpire)
-             add_post_meta($newCouponId, 'coupon_expire_date_metadata', $cpExpire, true);
-         // Add origin coupon title
-         add_post_meta($newCouponId, 'origin_title_metadata', $cpTitle, true);
-     }
-     return $newCouponId;
- }
- // Process html and get all expired coupons
- function savings_addExpiredCoupon($data, $storeId) {
-     if (sizeof($data->find('div[class="wrapper-code-reveal"]'))) {
-         $cpCode = $data->find('input[class="code"]', 0)->value;
-     }
-     if (!$cpCode) {
-         return;
-     }
-     $cpTitle = trim($data->find('p[class="title"]', 0)->plaintext);
-     $cpTitle = str_replace("'", "", $cpTitle);
-     if (check_exist_coupon_title_origin($cpTitle, $cpCode, $storeId) > 0) {
-         return 0;
-     }
-     $cpContent = trim($data->find('p[class="desc"]', 0)->plaintext);
-     // Add new coupon
-     $couponArgs = array(
-         'post_title' => $cpTitle,
-         'post_content' => $cpContent,
-         'post_type' => 'coupon',
-         'post_status' => 'pending');
-     $newCouponId = wp_insert_post($couponArgs);
-     // Add coupon meta
-     if ($newCouponId > 0) {
-         add_post_meta($newCouponId, 'store_id_metadata', $storeId, true);
-         if ($cpCode)
-             add_post_meta($newCouponId, 'coupon_code_metadata', $cpCode, true);
-         add_post_meta($newCouponId, 'coupon_expire_date_metadata', 'Expired', true);
-         // Add origin coupon title
-         add_post_meta($newCouponId, 'origin_title_metadata', $cpTitle, true);
-     }
-     return $newCouponId;
  }
 ?>

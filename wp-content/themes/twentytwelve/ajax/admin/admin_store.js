@@ -1,6 +1,5 @@
 jQuery(document).ready(function($)
 {
-
     if(typenow == 'store'){
         // Display all coupons of current store
         // check if in store edit page
@@ -36,5 +35,13 @@ jQuery(document).ready(function($)
            }
         }
     }
+    if(typenow == 'store' || typenow == 'coupon'){
 
+        var customDiv = "<div class = 'postbox'>"
+        +"<div class = 'handlediv' title = 'Click to toggle'><br/></div>"
+        +"<h3 class = 'hndle'><span>Custom Div</span></h3>"
+        +"<div class = 'inside'></div>"
+        +"</div>";
+        $('#submitdiv').parent().prepend(customDiv);
+    }
 })
