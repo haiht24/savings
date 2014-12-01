@@ -31,7 +31,7 @@ body {margin: 10px;}
 <hr />
     <input type="button" id="btnRSGetCategory" value="(Cat)Reset check get child categories" />
     <input type="button" id="btnResetIsGetCoupon" value="(Store)Reset is get coupon" />
-    <input type="button" id="btnResetLastNumberCoupon" value="(Store)Reset value last number coupon" />
+    <input type="button" id="btnResetTurnGetCoupon" value="(Store)Reset turn get coupons" />
 <?php
  if(strpos(home_url(), 'localhost') >= 0): ?>
 <hr />
@@ -42,10 +42,10 @@ body {margin: 10px;}
 <label id="messStoreNotGetCoupon"></label>
 <div id="storeNotGetCoupon" style='height: 200px; overflow-y: scroll;'></div>
 <div id="result" style='height: 200px; overflow-y: scroll;'></div>
-<div class="cat_not_check_cat" style="background-color: lightgreen;height: 25px;text-align: center;">
+<div class="cat_not_check_cat" style="background-color: lightgreen;height: 25px;text-align: center;display: none;">
     <label style="padding: 10px;">Category not check</label>
 </div>
-<div class="cat_not_get_store" style="background-color: lightgreen;height: 25px;text-align: center;">
+<div class="cat_not_get_store" style="background-color: lightgreen;height: 25px;text-align: center;display: none;">
     <label style="padding: 10px;">Category not get stores</label>
 </div>
 <?php wp_footer(); ?>

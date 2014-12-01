@@ -64,6 +64,15 @@
 					'std' => '',
 					'type' => 'text',
 					'class' => '',
+					'choices' => ''),
+                // Coupon ID at target site
+                array(
+					'id' => 'target_cpid_metadata',
+					'label' => 'Coupon ID at target site',
+					'desc' => '',
+					'std' => '',
+					'type' => 'text',
+					'class' => '',
 					'choices' => '')
 
                     ));

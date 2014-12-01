@@ -56,10 +56,10 @@
 					'type' => 'text',
 					'class' => '',
 					'choices' => ''),
-                // Last number coupon
+                // Get coupon first time
                 array(
-					'id' => 'last_number_coupon',
-					'label' => 'Last number coupon',
+					'id' => 'get_coupon_turn',
+					'label' => 'Turn',
 					'desc' => '',
 					'std' => '',
 					'type' => 'text',

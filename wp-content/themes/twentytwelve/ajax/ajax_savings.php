@@ -97,12 +97,7 @@
      $storeID = $_POST['storeID'];
      $storeName = get_post_field('post_title', $storeID);
      $storeURL = $_POST['storeURL'];
-     //$storeURL = 'http://www.retailmenot.com/view/amazon.com';
-     //$storeURL = 'http://www.savings.com/m-Kmart-coupons.html';
-     //$storeURL = 'http://www.savings.com/m-SuperStarTickets-coupons.html';
-     //$storeURL = 'http://www.savings.com/m-Sticky-Jewelry-coupons.html';
-     //$storeURL = 'http://www.savings.com/m-GrowThink-coupons.html';
-     $last_number_coupon = get_post_meta($storeID, 'last_number_coupon', true);
+     $turnGetCoupon = get_post_meta($storeID, 'get_coupon_turn', true);
 
      $curl = curl_init();
      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -119,82 +114,96 @@
      if (!$html) {
          die('Can not get Html content. Plz try again');
      }
-     // Get store logo
-     $storeLogo = '';
-     foreach ($html->find('div[class="entity-logo"] img') as $a) {
-         $storeLogo = $a->getAttribute('src');
-     }
-     if ($storeLogo) {
-         // upload logo to server
-         $logo = uploadLogoToServer($storeLogo, getStoreName($storeID));
-         add_post_meta($storeID, 'store_img_metadata', $logo, true);
-     }
-     // Get store description and update to DB
-     $storeDesc = $html->find('div[data-id="text-full"]', 0)->plaintext;
-     if ($storeDesc) {
-         wp_update_post(array('ID' => $storeID, 'post_content' => $storeDesc));
-     }
-     // Get store Home page
-     $storeHomePage = '';
-     foreach ($html->find('div[class="merchant-links module"] li') as $li) {
-         $liValue = trim($li->find('a', 0)->plaintext);
-         if (strpos('Home Page', $liValue) >= 0) {
-             $storeHomePage = $li->find('a', 0)->href;
-             break;
+     // Not re-update store info
+     if (!$turnGetCoupon) {
+         // Get store logo
+         $storeLogo = '';
+         foreach ($html->find('div[class="entity-logo"] img') as $a) {
+             $storeLogo = $a->getAttribute('src');
          }
-     }
-     if ($storeDesc) {
-         update_post_meta($storeID, 'store_homepage_metadata', $storeHomePage);
-     }
-     // Re-Update parent categories of store
-     $storeBreadcrum = $html->find('div[class="breadcrumb clearfix"] a');
-     $arrCategoriesName = array();
-     foreach ($storeBreadcrum as $a) {
-         $reCategoryName = trim(str_replace('&', 'and', $a->plaintext));
-         if ($reCategoryName != 'Categories') {
-             array_push($arrCategoriesName, $reCategoryName);
+         if ($storeLogo) {
+             // upload logo to server
+             $logo = uploadLogoToServer($storeLogo, getStoreName($storeID));
+             add_post_meta($storeID, 'store_img_metadata', $logo, true);
          }
-     }
-     if (count($arrCategoriesName) > 0) {
-         wp_add_object_terms($storeID, $arrCategoriesName, 'store_category');
+         // Get store description and update to DB
+         $storeDesc = $html->find('div[data-id="text-full"]', 0)->plaintext;
+         if ($storeDesc) {
+             wp_update_post(array('ID' => $storeID, 'post_content' => $storeDesc));
+         }
+         // Get store Home page
+         $storeHomePage = '';
+         foreach ($html->find('div[class="merchant-links module"] li') as $li) {
+             $liValue = trim($li->find('a', 0)->plaintext);
+             if (strpos('Home Page', $liValue) >= 0) {
+                 $storeHomePage = $li->find('a', 0)->href;
+                 break;
+             }
+         }
+         if ($storeDesc) {
+             update_post_meta($storeID, 'store_homepage_metadata', $storeHomePage);
+         }
+         // Re-Update parent categories of store
+         $storeBreadcrum = $html->find('div[class="breadcrumb clearfix"] a');
+         $arrCategoriesName = array();
+         foreach ($storeBreadcrum as $a) {
+             $reCategoryName = trim(str_replace('&', 'and', $a->plaintext));
+             if ($reCategoryName != 'Categories') {
+                 array_push($arrCategoriesName, $reCategoryName);
+             }
+         }
+         if (count($arrCategoriesName) > 0) {
+             wp_add_object_terms($storeID, $arrCategoriesName, 'store_category');
+         }
+         update_post_meta($storeID, 'get_coupon_turn', 1);
      }
      /**
       * GET COUPONS OF STORE
       */
-     // If store have new coupons
-     $countCurrentCoupons = count($html->find('.hasCode'));
-     if ($last_number_coupon) {
-         if ($last_number_coupon < $countCurrentCoupons) {
-             $number_new_coupon = $countCurrentCoupons - $last_number_coupon;
-             for ($i = 0; $i < $number_new_coupon; $i++) {
-                 $divNewCoupon = $html->find('.hasCode', $i);
-                 if (savings_addNewCoupon($divNewCoupon, $storeID, $storeName) > 0) {
-                     $c++;
+     // Get coupon ids from target site
+     $arrTargetSiteCpIds = array();
+     foreach ($html->find('.hasCode') as $cp) {
+         array_push($arrTargetSiteCpIds, $cp->id);
+     }
+     if (count($arrTargetSiteCpIds) > 0) {
+         foreach ($arrTargetSiteCpIds as $tId) {
+             if (checkExistTargetCpId($tId) == 0) {
+                 foreach ($html->find('#' . $tId) as $divCoupon) {
+                     if (savings_addNewCoupon($divCoupon, $storeID, $storeName, $tId) > 0) {
+                         $c++;
+                     }
                  }
              }
-             update_post_meta($storeID, 'last_number_coupon', $countCurrentCoupons);
-             update_post_meta($storeID, 'is_get_coupon', 1);
-             echo $c;
-             //return;
          }
-     } else { // First time get coupons
-         foreach ($html->find('.hasCode') as $div) {
-             if (savings_addNewCoupon($div, $storeID, $storeName) > 0) {
-                 $c++;
-             }
-         }
-         // Mark store as getted coupon
-         update_post_meta($storeID, 'is_get_coupon', 1);
-         update_post_meta($storeID, 'last_number_coupon', $c);
-         echo $c;
      }
      // Add expired coupons
-     $countExpiredCouponAdded = 0;
-     foreach ($html->find('div[class="module-deal expired revealCode"]') as $div) {
-         savings_addExpiredCoupon($div, $storeID);
+     $arrTargetExpireCp = array();
+     foreach ($html->find('div[class="module-deal expired revealCode"]') as $exCp) {
+         array_push($arrTargetExpireCp, $exCp->id);
      }
+     if (count($arrTargetExpireCp) > 0) {
+         foreach ($arrTargetExpireCp as $tId) {
+             if (checkExistTargetCpId($tId) == 0) {
+                 foreach ($html->find('#' . $tId) as $divCoupon) {
+                     $isAddExpireCoupon = '';
+                     $isAddExpireCoupon = savings_addExpiredCoupon($divCoupon, $storeID);
+                     if ($isAddExpireCoupon > 0) {
+                         $c++;
+                     }
+                 }
+             }
+         }
+     }
+     // Mark store as getted coupon
+     update_post_meta($storeID, 'is_get_coupon', 1);
+     // Update Turn get coupon
+     if (!$turnGetCoupon)
+         update_post_meta($storeID, 'get_coupon_turn', 1);
+     else
+         update_post_meta($storeID, 'get_coupon_turn', $turnGetCoupon + 1);
      $html->clear();
      unset($html);
+     echo $c;
  }
  // GET CATEGORIES
  if ($_POST['action'] == 'get_categories') {
@@ -306,9 +315,9 @@
      echo json_encode(print_cat_not_getted_stores('array'));
  }
  // Reset last number coupon
- if ($_POST['action'] == 'reset_lastnumbercoupon') {
+ if ($_POST['action'] == 'resetTurnGetCoupon') {
      global $wpdb;
-     $qr = "DELETE FROM wp_postmeta WHERE meta_key = 'last_number_coupon'";
+     $qr = "DELETE FROM wp_postmeta WHERE meta_key = 'get_coupon_turn'";
      $rs = $wpdb->query($qr);
  }
  // Delete stores

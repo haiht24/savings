@@ -8,16 +8,16 @@
     $numberPost = $_POST['numberPost'];
     $currentUserId = $_POST['currentUserId'];
     global $wpdb;
-    //$qr = "
-//    SELECT ID,post_title FROM wp_posts WHERE post_type = 'store' AND post_status = 'pending' AND post_author = 0
-//    ORDER BY RAND() LIMIT 0,{$numberPost}
-//    ";
-    // Get stores have coupons only
     $qr = "
-    SELECT ID,post_title FROM wp_posts WHERE post_type = 'store' AND post_status = 'pending' AND post_author = 0
-    AND ID IN (SELECT meta_value FROM wp_postmeta WHERE meta_key = 'store_id_metadata')
+    SELECT ID,post_title FROM wp_posts WHERE post_type = 'store' AND post_status = 'pending' AND ( post_author = 0 OR post_author = 1)
     ORDER BY RAND() LIMIT 0,{$numberPost}
     ";
+    // Get stores have coupons only
+//    $qr = "
+//    SELECT ID,post_title FROM wp_posts WHERE post_type = 'store' AND post_status = 'pending' AND ( post_author = 0 OR post_author = 1)
+//    AND ID IN (SELECT meta_value FROM wp_postmeta WHERE meta_key = 'store_id_metadata')
+//    ORDER BY RAND() LIMIT 0,{$numberPost}
+//    ";
     $rs = $wpdb->get_results($qr, ARRAY_A);
     if(count($rs) > 0){
         foreach ($rs as $r) {

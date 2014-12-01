@@ -29,7 +29,7 @@
 				'editor',
 				'author',
 				//'cats',
-				//'revisions'
+				'revisions'
                 )));
 	}
 ?>

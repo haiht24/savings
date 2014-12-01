@@ -179,7 +179,7 @@ jQuery(document).ready(function($){
                     url: tempDirUri + "/ajax/ajax_savings.php",
                     data: {action : 'getCoupons',storeID : storeID, storeURL : storeURL},
                     success: function(rs) {
-                        console.log(rs + ' new active coupons added');
+                        console.log(rs + ' new coupons added');
                     },
                     timeout : 999999999,
                     complete: function() {
@@ -209,15 +209,15 @@ jQuery(document).ready(function($){
             });
         })
         // RESET LAST NUMBER COUPON
-        $('#btnResetLastNumberCoupon').click(function(){
+        $('#btnResetTurnGetCoupon').click(function(){
             var text = $(this).val();
             $(this).val(text + '(running...)');
             $.ajax({
                 type: 'POST',
                 url: tempDirUri + "/ajax/ajax_savings.php",
-                data: {action : 'reset_lastnumbercoupon'},
+                data: {action : 'resetTurnGetCoupon'},
                 success: function(rs) {
-                    $('#btnResetLastNumberCoupon').val(text + '(Completed)');
+                    $('#btnResetTurnGetCoupon').val(text + '(Completed)');
                 }
             });
         })
@@ -252,7 +252,7 @@ jQuery(document).ready(function($){
                 url: tempDirUri + "/ajax/ajax_savings.php",
                 data: {action : 'deleteCoupons'},
                 success: function(rs) {
-                    console.log(rs);
+                    console.log('Deleted coupons');
                     $(this).val('Deleted all coupons');
                 }
             });

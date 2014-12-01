@@ -579,13 +579,13 @@
              $cpCode = $data->find('input[class="code"]', 0)->value;
          }
          if (!$cpCode) {
-             return;
+             return false;
          }
          $cpTitle = trim($data->find('p[class="title"]', 0)->plaintext);
          $cpTitle = str_replace("'", "", $cpTitle);
-         if (check_exist_coupon_title_origin($cpTitle, $cpCode, $storeId) > 0) {
-             return 0;
-         }
+//         if (check_exist_coupon_title_origin($cpTitle, $cpCode, $storeId) > 0) {
+//             return 0;
+//         }
          $cpContent = trim($data->find('p[class="desc"]', 0)->plaintext);
          // Add new coupon
          $couponArgs = array(
@@ -600,30 +600,32 @@
              if ($cpCode)
                  add_post_meta($newCouponId, 'coupon_code_metadata', $cpCode, true);
              add_post_meta($newCouponId, 'coupon_expire_date_metadata', 'Expired', true);
+             add_post_meta($newCouponId, 'target_cpid_metadata', $data->id, true);
              // Add origin coupon title
              add_post_meta($newCouponId, 'origin_title_metadata', $cpTitle, true);
+             return $newCouponId;
          }
-         return $newCouponId;
+         else return false;
      }
      // Process html and add new coupon
-     function savings_addNewCoupon($data, $storeId, $storeName = '') {
-         //$storeName = 'Sticky Jewelry';
+     function savings_addNewCoupon($data, $storeId, $storeName = '', $targetSiteCouponId) {
          $merchantName = trim($data->find('input[name="property-merchant-name"]', 0)->value);
-         echo '(' . $storeName . ' | ' . $merchantName . ' =>';
+
          // check if this coupon not in current store (relate coupon)
          if ($merchantName != $storeName) {
-            echo '[Not add])';
+            echo '(' . $storeName . ' | ' . $merchantName . ' => [Not add])';
             return;
-         } else {
-            echo '[Added])';
          }
+         //else {
+//            echo '[Added])';
+//         }
 
          $cpCode = $data->find('input[class="code"]', 0)->value;
          $cpTitle = trim($data->find('div[class="content"] h3 a', 0)->plaintext);
          $cpTitle = str_replace("'", "", $cpTitle);
-         if (check_exist_coupon_title_origin($cpTitle, $cpCode, $storeId) > 0) {
-             return 0;
-         }
+//         if (check_exist_coupon_title_origin($cpTitle, $cpCode, $storeId) > 0) {
+//             return 0;
+//         }
          $cpContent = trim(str_replace('more info', '', $data->find('p[class="desc"]', 0)->plaintext));
          $cpContentMore = trim($data->find('div[class="details-full"] p', 0)->plaintext);
          $cpContent .= $cpContentMore;
@@ -649,6 +651,8 @@
                  add_post_meta($newCouponId, 'coupon_code_metadata', $cpCode, true);
              if ($cpExpire)
                  add_post_meta($newCouponId, 'coupon_expire_date_metadata', $cpExpire, true);
+             if($targetSiteCouponId)
+                 add_post_meta($newCouponId, 'target_cpid_metadata', $targetSiteCouponId, true);
              // Add origin coupon title
              add_post_meta($newCouponId, 'origin_title_metadata', $cpTitle, true);
          }
@@ -672,4 +676,9 @@
         );
         $the_query = new WP_Query( $args );
         return $the_query->post_count;
+    }
+    function checkExistTargetCpId($targetCpId){
+        global $wpdb;
+        $rs = $wpdb->get_results("select post_id from wp_postmeta where meta_key = 'target_cpid_metadata' and meta_value = '{$targetCpId}'");
+        return count($rs);
     }
