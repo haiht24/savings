@@ -24,7 +24,7 @@
                 $color = "style='color:red'";
             }
             $couponTitle = str_replace("'", "", $couponTitle);
-            $editLink = get_edit_post_link($c->ID);
+            $editLink = admin_url("post.php?post={$c->ID}&action=edit");
             $link = "<a target = '_blank' href='{$editLink}' title = '{$couponStatus}' {$color} >{$couponTitle}</a> {$showExpire}";
             array_push($arrCoupons, $link);
         }
