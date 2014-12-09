@@ -52,7 +52,7 @@
     $cp_id = cpx_get_latest_cp_in_store($s->ID, 1, 'ID');
     // If store have published coupon => alter store title with [store_name(removed "Coupon Codes") + coupon title]
     if($cp_id)
-        $st_alter_title = str_replace('Coupon Codes', '', $st_title) . cpx_get_latest_cp_in_store($s->ID);
+        $st_alter_title = str_replace('Coupon Codes', '', $st_title) . ' ' . cpx_get_latest_cp_in_store($s->ID);
     else
         $st_alter_title = $st_title;
 
@@ -69,20 +69,29 @@
 ?>
     <article>
 		<header class="entry-header">
+        <div class="item-thumb">
             <a title="<?php echo $st_title; ?>" href="<?php echo $st_permalink; ?>">
                 <img alt="<?php echo $st_title . ' logo'; ?>" src="<?php echo $st_logo; ?>" style="width: 100px;height: 50px;" />
             </a>
+        </div>
+        <div class="item-title">
 			<h3 class="entry-title"><?php echo $st_alter_title; ?></h3>
+        </div>
 		</header>
         <?php
         // PRINT COUPON DETAIL IF STORE HAVE PUBLISHED COUPON
         if($cp_id): ?>
 		<div class="entry-content">
 			<p><?php echo $cp_content; ?></p>
-            <p>Coupon Code: <?php echo $cp_code; ?></p>
+            <p>Coupon Code: <span class="badge"><?php echo $cp_code; ?></span></p>
             <p>(<?php echo $cp_use_today; ?> used today)</p>
-            <p><a title="<?php echo $st_title; ?>" href="<?php echo $st_permalink;?>">More <?php echo $st_title; ?></a></p>
-		</div><!-- .entry-content -->
+            <p><a title="<?php echo $st_title; ?>" href="<?php echo $st_permalink;?>">More <?php echo $st_title . ' Coupon Codes'; ?></a></p>
+		</div>
+        <?php else: ?>
+        <div class="entry-content">
+			<p><?php echo limit_string(get_post_field('post_content', $s->ID), 200, '...'); ?></p>
+            <p><a title="<?php echo $st_title; ?>" href="<?php echo $st_permalink;?>">More <?php echo $st_title . ' Coupon Codes'; ?></a></p>
+		</div>
         <?php endif; ?>
         <?php if(current_user_can('edit_post')) echo edit_post_link('Edit Store','','',$s->ID); ?>
 	</article><!-- #post-0 -->

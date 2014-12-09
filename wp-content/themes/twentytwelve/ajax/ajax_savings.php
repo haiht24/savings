@@ -89,7 +89,21 @@
      echo json_encode($arrStores);
  }
  if ($_POST['action'] == 'test') {
-     printCatNotHaveUrl();
+     //printCatNotHaveUrl();
+     $opts = array(
+        'http'=>array(
+            'method'=>"GET",
+            'header'=>"User-Agent: User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.52 Safari/536.5\r\n"
+        )
+    );
+    $context = stream_context_create($opts);
+    $html = file_get_html('http://www.retailmenot.com', false, $context);
+    //foreach($html->find('div[id = "recaptcha_widget_div"]') as $c){
+//        echo $c;
+//    }
+    if(sizeof($html->find('div[id = "recaptcha_widget_div"]')) == 0){
+        echo $html;
+    }
  }
  // GET COUPONS
  if ($_POST['action'] == 'getCoupons') {

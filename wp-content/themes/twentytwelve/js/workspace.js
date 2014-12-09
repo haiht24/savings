@@ -49,4 +49,21 @@ jQuery(document).ready(function($){
             }
         });
     })
+    $('#btnFix').click(function(){
+        $.ajax({
+            type: 'POST',
+            url: tempDirUri + "/ajax/ajax_workspace.php",
+            data: {
+                action : 'fix',
+                currentUserId : currentUserId
+            },
+            //dataType : 'json',
+            success: function(rs) {
+                console.log(rs);
+                //location.reload();
+            },
+            timeout : 999999999,
+            complete: function() {}
+        });
+    })
 })

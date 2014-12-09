@@ -259,14 +259,21 @@ jQuery(document).ready(function($){
         })
         // Test
         $('#btnTest').click(function(){
+            workerRetailMeNot();
+        })
+        function workerRetailMeNot(){
             $.ajax({
                 type: 'POST',
                 url: tempDirUri + "/ajax/ajax_savings.php",
                 data: {action : 'test'},
-                //dataType : 'json',
                 success: function(rs) {
                     console.log(rs);
+                    $('#result').html(rs);
+                },
+                timeout : 999999999,
+                complete: function() {
+                    //setTimeout(workerRetailMeNot, 2000);
                 }
             });
-        })
+        }
     })

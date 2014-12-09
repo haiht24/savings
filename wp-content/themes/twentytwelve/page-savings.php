@@ -15,9 +15,9 @@ body {margin: 10px;}
     var tempDirUri = '<?php echo get_template_directory_uri() ?>';
 </script>
 <div id="control">
-<!--
+
     <input type="button" value="test" id="btnTest" />
--->
+
     <input type="button" id="btnGetCategories" value="Get Categories" />
     <input type="text" id="txtKeywordAfterSlug" value="-coupon-codes" placeholder="eg: -coupon-codes" />
     <input type="button" id="fastGetCat" value="Fast check get cat" />
@@ -31,7 +31,6 @@ body {margin: 10px;}
 <hr />
     <input type="button" id="btnRSGetCategory" value="(Cat)Reset check get child categories" />
     <input type="button" id="btnResetIsGetCoupon" value="(Store)Reset is get coupon" />
-
 <!--
 <hr />
     <input type="button" id="btnResetTurnGetCoupon" value="(Store)Reset turn get coupons" />

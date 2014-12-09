@@ -3,18 +3,6 @@
 	include_once ('load_metadata.php');
     include_once ('load_widgets.php');
 	////////////////////////////////////////////CRAWL FUNCTIONS//////////////////////////////////////////////////////
-    // Update coupons to specify Author Id
-    function updateCouponAuthor($storeId, $authorId){
-        global $wpdb;
-        $qrGetCouponsOfStore = "SELECT post_id FROM wp_postmeta WHERE meta_key = 'store_id_metadata' AND meta_value = {$storeId}";
-        $rs = $wpdb->get_results($qrGetCouponsOfStore);
-        if(count($rs) > 0){
-            foreach ($rs as $r) {
-                $qrUpdateCouponAuthor = "update wp_posts set post_author = {$authorId} where ID = {$r->post_id}";
-                $wpdb->query($qrUpdateCouponAuthor);
-            }
-        }
-    }
     function getStoreName($storeId) {
         return get_post_field('post_title', $storeId);
     }
@@ -515,7 +503,7 @@
 			</header>
 			<div class="entry-content">
 				<p><?php echo $cp_content; ?></p>
-                <p>Coupon Code: <?php echo $cp_code; ?></p>
+                <p>Coupon Code: <span class="badge"><?php echo $cp_code; ?></span></p>
                 <?php if($cp_expire): ?>
                 Expire : <?php echo $cp_expire; ?>
                 <?php endif; ?>
@@ -658,13 +646,13 @@
          }
          return $newCouponId;
      }
-     // Get pending coupons of store
-    function getPendingCoupons($storeId)
+     // Count pending coupons of store
+    function countCouponsByStatus($storeId, $status = 'pending')
     {
         $args = array(
         	'posts_per_page' => -1,
         	'post_type' => 'coupon',
-            'post_status' => array('pending'),
+            'post_status' => array($status),
         	'meta_query' => array(
         		//'relation' => 'AND',
                 array(
@@ -677,8 +665,40 @@
         $the_query = new WP_Query( $args );
         return $the_query->post_count;
     }
+    function getCouponsByStore($storeId, $status = array('publish'))
+    {
+        $args = array(
+        	'posts_per_page' => -1,
+        	'post_type' => 'coupon',
+            'post_status' => $status,
+        	'meta_query' => array(
+        		//'relation' => 'AND',
+                array(
+                    'key' => 'store_id_metadata',
+                    'value' => $storeId,
+                    'compare' => '='
+                )
+        	)
+        );
+        $the_query = new WP_Query( $args );
+        $rs = array();
+        if($the_query->have_posts()){
+            foreach ($the_query->posts as $p) {
+                array_push($rs, $p->ID);
+            }
+        }
+        return $rs;
+    }
     function checkExistTargetCpId($targetCpId){
         global $wpdb;
         $rs = $wpdb->get_results("select post_id from wp_postmeta where meta_key = 'target_cpid_metadata' and meta_value = '{$targetCpId}'");
         return count($rs);
+    }
+    function limit_string($str, $maxlen, $endchar = '...')
+    {
+        $str = trim($str);
+        if (strlen($str) <= $maxlen)
+			return $str;
+        $newstr = substr($str, 0, $maxlen);
+        return $newstr.$endchar;
     }

@@ -163,8 +163,9 @@ small {
 	font-size: smaller;
 }
 img {
-	border: 0;
-	-ms-interpolation-mode: bicubic;
+border: 1px solid #ddd;
+border-radius: 7px;
+padding: 5px;
 }
 
 /* Clearing floats */
@@ -183,7 +184,33 @@ img {
 	content: "";
 }
 
+.item-thumb {
+    float: left;
+    height: 100px;
+    margin: 0 5px 5px 0;
+    padding: 5px;
+}
 
+.item-title {
+    padding-bottom: 0.2em;
+}
+.item-title h3{
+    clear: none !important;
+}
+.badge {
+    background-color: #999;
+    border-radius: 10px;
+    color: #fff;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    min-width: 10px;
+    padding: 3px 7px;
+    text-align: center;
+    vertical-align: baseline;
+    white-space: nowrap;
+}
 /* =Repeatable patterns
 -------------------------------------------------------------- */
 
@@ -1591,8 +1618,7 @@ img#wpstats {
 		display: none;
 	}
 	.entry-header .entry-title {
-		font-size: 22px;
-		font-size: 1.571428571rem;
+		font-weight: bold;
 	}
 	#respond form input[type="text"] {
 		width: 46.333333333%;

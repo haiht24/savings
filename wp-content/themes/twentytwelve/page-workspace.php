@@ -23,6 +23,7 @@
         <label for="numberPost">Number of posts</label>
         <input id="numberPost" value="10" placeholder="Enter number of random stores" />
         <button id="btnGetRandomStores">Get Random Stores</button><span id="mess"></span>
+        <button id="btnFix">Fix</button><span id="mess"></span>
     </div>
 <!-- Right -->
     <div class="div-right">

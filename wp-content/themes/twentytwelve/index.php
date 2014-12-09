@@ -22,36 +22,33 @@ if($rs != 0):
         // Store info
         $st_title = get_post_field('post_title', $r['st_id']);
         $st_permalink = get_post_field('post_name', $r['st_id']);
-
         $st_logo = get_post_meta($r['st_id'], 'store_img_metadata', true);
         // Coupon info
         $cp_content = get_post_field('post_content', $r['cp_id']);
-        $cp_type_off = get_post_meta($r['cp_id'], 'coupon_typeoff_metadata', true);
-        $result = cpx_filter_coupon_type_off($cp_type_off, $st_permalink, $cp_content);
-        $cp_content = $result['content'];
-
         $cp_code = get_post_meta($r['cp_id'], 'coupon_code_metadata', true);
         $cp_use_today = get_post_meta($r['cp_id'], 'use_today_metadata', true);
         if(!$cp_use_today)
             $cp_use_today = 1;
-
         ?>
             <article>
 				<header class="entry-header">
-                    <a title="<?php echo $st_title; ?>" href="<?php echo $st_permalink; ?>">
-                        <img alt="<?php echo $st_title.' logo'?>" src="<?php echo $st_logo; ?>" style="width: 100px;height: 50px;" />
-                    </a>
-					<h3 class="entry-title"><?php echo $st_title; ?></h3>
+        			<div class="item-thumb">
+                        <a title="<?php echo $st_title; ?>" href="<?php echo $st_permalink; ?>">
+                            <img alt="<?php echo $st_title.' logo'?>" src="<?php echo $st_logo; ?>" style="width: 100px;height: 50px;" />
+                        </a>
+                    </div>
+        			<div class="item-title">
+                        <h3 class="entry-title"><?php echo $st_title; ?></h3>
+        			</div>
 				</header>
 
 				<div class="entry-content">
 					<p>
                     <?php echo $cp_content; ?>
-                    <?php if($result['percent_off'] || $result['dolar_off'] || $result['free']) {echo " - Coupon Type: ".$result['percent_off'].' '.$result['dolar_off'].' '.$result['free'];} ?>
                     </p>
-                    <p>Coupon Code: <?php echo $cp_code; ?></p>
+                    <p>Coupon Code: <span class="badge"><?php echo $cp_code; ?></span></p>
                     <p>(<?php echo $cp_use_today; ?> used today)</p>
-                    <p><a title="<?php echo $st_title; ?>" href="<?php echo $st_permalink;?>">More <?php echo $st_title; ?></a></p>
+                    <p><a title="<?php echo $st_title; ?>" href="<?php echo $st_permalink;?>">More <?php echo $st_title . ' Coupon Codes'; ?></a></p>
 				</div><!-- .entry-content -->
             <?php if(current_user_can('edit_post')) echo edit_post_link('Edit Coupon','','',$r['cp_id']); ?>
             <?php if(current_user_can('edit_post')) echo edit_post_link('Edit Store','','',$r['st_id']); ?>
