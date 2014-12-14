@@ -16,8 +16,10 @@ body {margin: 10px;}
 </script>
 <div id="control">
 
-    <input type="button" value="test" id="btnTest" />
-
+    <input type="button" value="Test" id="btnTest" />
+    <input type="button" value="Test Spin" id="btnSpin" />
+    <input type="button" value="Reset Store To First Revision" id="btnResetToFirstRevision" />
+<hr />
     <input type="button" id="btnGetCategories" value="Get Categories" />
     <input type="text" id="txtKeywordAfterSlug" value="-coupon-codes" placeholder="eg: -coupon-codes" />
     <input type="button" id="fastGetCat" value="Fast check get cat" />

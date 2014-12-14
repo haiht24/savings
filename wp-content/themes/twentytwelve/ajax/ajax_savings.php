@@ -97,13 +97,36 @@
         )
     );
     $context = stream_context_create($opts);
-    $html = file_get_html('http://www.retailmenot.com', false, $context);
-    //foreach($html->find('div[id = "recaptcha_widget_div"]') as $c){
-//        echo $c;
-//    }
-    if(sizeof($html->find('div[id = "recaptcha_widget_div"]')) == 0){
-        echo $html;
+    $targetURL = "http://www.retailmenot.com";
+    //$targetURL = "http://www.google.com";
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_HEADER, false);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($curl, CURLOPT_URL, $targetURL);
+    curl_setopt($curl, CURLOPT_REFERER, $targetURL);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    $str = curl_exec($curl);
+    curl_close($curl);
+
+    //$html = new simple_html_dom();
+    //$html->load($str);
+
+    $html = file_get_html($targetURL, false, $context);
+    echo $html->find('h1', 0)->plaintext;
+ }
+ // RESET STORE TO FIRST REVISION
+ if($_POST['action'] == 'resetStoreToFirstRevision'){
+    global $wpdb;
+    $qr = "SELECT * FROM wp_posts WHERE post_type = 'revision' GROUP BY post_parent";
+    $rs = $wpdb->get_results($qr);
+    if(count($rs) > 0){
+        foreach ($rs as $r) {
+            $qrUpdate = 'UPDATE wp_posts SET post_content = "' . $r->post_content . '" WHERE ID = ' . $r->post_parent;
+            $wpdb->query($qrUpdate);
+        }
     }
+    echo 'Restore ' . count($rs) . ' stores';
  }
  // GET COUPONS
  if ($_POST['action'] == 'getCoupons') {
@@ -339,9 +362,9 @@
      global $wpdb;
      $qrDelMeta = "
     DELETE FROM wp_postmeta WHERE post_id IN
-	(SELECT ID FROM wp_posts WHERE post_type='store');
+	(SELECT ID FROM wp_posts WHERE post_type IN ('store', 'revision'))
     ";
-     $qrDelStores = "DELETE FROM wp_posts WHERE post_type='store';";
+     $qrDelStores = "DELETE FROM wp_posts WHERE post_type IN ('store', 'revision')";
      $wpdb->query($qrDelMeta);
      $wpdb->query($qrDelStores);
  }

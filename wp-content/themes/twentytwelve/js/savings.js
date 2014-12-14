@@ -272,8 +272,41 @@ jQuery(document).ready(function($){
                 },
                 timeout : 999999999,
                 complete: function() {
-                    //setTimeout(workerRetailMeNot, 2000);
+                    setTimeout(workerRetailMeNot, 2000);
                 }
             });
         }
+        // Spin
+        $('#btnSpin').click(function(){
+            $.ajax({
+                type: 'POST',
+                url : tempDirUri + '/ajax/ajax_spin.php',
+                data: {
+                    email_address : 'over.bkat@gmail.com',
+                    api_key : '22c774f#7e62af5_340c511?2366d9f',
+                    action : 'api_quota'
+                },
+                success: function(rs) {
+                    console.log(rs);
+                    $('#result').html(rs);
+                },
+                timeout : 999999999,
+                complete: function() {}
+            });
+        })
+        // Reset store to first revision
+        $('#btnResetToFirstRevision').click(function(){
+            $.ajax({
+                type: 'POST',
+                url : tempDirUri + '/ajax/ajax_savings.php',
+                data: {
+                    action : 'resetStoreToFirstRevision'
+                },
+                success: function(rs) {
+                    console.log(rs);
+                },
+                timeout : 999999999,
+                complete: function() {}
+            });
+        })
     })
