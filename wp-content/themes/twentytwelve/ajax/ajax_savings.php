@@ -122,7 +122,8 @@
     $rs = $wpdb->get_results($qr);
     if(count($rs) > 0){
         foreach ($rs as $r) {
-            $qrUpdate = 'UPDATE wp_posts SET post_content = "' . $r->post_content . '" WHERE ID = ' . $r->post_parent;
+            $qrUpdate = 'UPDATE wp_posts SET post_content = "' . $r->post_content . '", post_title = "'. $r->post_title .'" WHERE ID = ' . $r->post_parent;
+            //$qrUpdate = 'UPDATE wp_posts SET post_content = "' . $r->post_content . '" WHERE ID = ' . $r->post_parent;
             $wpdb->query($qrUpdate);
         }
     }

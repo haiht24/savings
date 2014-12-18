@@ -3,55 +3,6 @@
 		<hgroup>
         <!-- STORE DETAIL HEADER -->
         <?php
-            //$token = explode('/', cpx_current_url());
-//            if(strpos(cpx_current_url(), 'percent-off') || strpos(cpx_current_url(), 'dolar-off') || strpos(cpx_current_url(), 'free-shipping'))
-//            {
-//                $type_off = str_replace('-', ' ', end($token));
-//                $type_off = str_replace('dolar', '$', $type_off);
-//                $type_off = str_replace('percent', '%', $type_off);
-//                if(strpos($type_off, '$'))
-//                {
-//                    $t = explode(' ', $type_off);
-//                    $like = $t[0].$t[1].' '.$t[2];
-//                }
-//                else if(strpos($type_off, '%'))
-//                {
-//                    $t = explode(' ', $type_off);
-//                    $like = $t[0].'\\'.$t[1].' '.$t[2];
-//                }
-//                else if(strpos($type_off, 'shipping'))
-//                {
-//                    $t = explode(' ', $type_off);
-//                    $like = 'Free Shipping';
-//                }
-//                $qr = "
-//                SELECT p1.post_id AS cp_id FROM wp_postmeta p1, wp_postmeta p2 WHERE p1.`post_id` = p2.`post_id` AND
-//                p1.meta_key = 'coupon_typeoff_metadata' AND p1.meta_value LIKE '%$like%'
-//                AND p2.`meta_key` = 'store_id_metadata' AND p2.`meta_value` = {$post->ID}
-//                ";
-//                global $wpdb;
-//                $arr_coupons = $wpdb->get_results($qr, ARRAY_A);
-//
-//                $store_title = get_post_field('post_title', $post->ID);
-//                $store_title .= ' '.str_replace('\\', '', $like);
-//                $store_home = get_post_meta($post->ID, 'store_homepage_metadata', true);
-//                $store_logo = get_post_meta($post->ID, 'store_img_metadata', true);
-//                if(function_exists('bcn_display'))
-//                {
-//                    $breadcrum = bcn_display(true).' / '.$store_title;
-//                }
-//            }
-//            else
-//            {
-//                $arr_coupons = cpx_get_latest_cp_in_store($post->ID, 1000);
-//                $store_title = get_post_field('post_title', $post->ID);
-//                $store_home = get_post_meta($post->ID, 'store_homepage_metadata', true);
-//                $store_logo = get_post_meta($post->ID, 'store_img_metadata', true);
-//                if(function_exists('bcn_display'))
-//                {
-//                    $breadcrum = bcn_display(true);
-//                }
-//            }
             $breadcrum = bcn_display(true);
             $store_title = get_post_field('post_title', $post->ID);
             $store_home = get_post_meta($post->ID, 'store_homepage_metadata', true);
@@ -127,6 +78,10 @@
         </div>
         <p>
         Best online <?php echo $store_title; ?> in <?php echo date('F Y'); ?>, updated daily. You can find and share all <?php echo $store_title; ?> for savings at online store <?php echo $store_home; ?>
+        </p>
+        <br />
+        <p>
+        <?php echo get_post_field('post_content', $post->ID); ?>
         </p>
         <hr />
 <!-- PRINT COUPONS -->

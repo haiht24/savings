@@ -16,7 +16,10 @@
         $imgSrc = explode('?', $imgSrc);
         $imgSrc = $imgSrc[0];
         $image_type = getImageType($imgSrc);
+
+        // Remove special characters from store name
         $storeName = str_replace(' ', '_', $storeName);
+        $storeName = preg_replace('/[^A-Za-z0-9\-]/', '', $storeName);
 
         $fileName = $storeName.'_coupon_codes_logo.'.$image_type;
         $uploadDir = wp_upload_dir();
@@ -322,44 +325,53 @@
 	 */
 	function cpx_get_latest_cp_by_store()
 	{
-		global $wpdb;
-		$qr = "
-        SELECT post_id AS cp_id, meta_value AS st_id FROM wp_postmeta WHERE meta_key = 'store_id_metadata'
-        AND post_id IN (SELECT ID FROM wp_posts WHERE post_type = 'coupon' AND post_status='publish')
-        AND meta_value IN (SELECT ID FROM wp_posts WHERE post_type = 'store' AND post_status='publish')
-        GROUP BY meta_value ORDER BY meta_id DESC LIMIT 0,20
-        ";
-		$rs = $wpdb->get_results($qr, ARRAY_A);
-		if (count($rs) > 0)
-			return $rs;
-		else
-			return 0;
+        $args = [
+        	'post_type' => 'store',
+            'orderby' => 'post_date_gmt',
+            'order' => 'DESC',
+            'posts_per_page' => 20,
+            'post_status' => ['publish']
+        ];
+        $the_query = new WP_Query($args);
+        if($the_query->have_posts()){
+            return $the_query->posts;
+        }
 	}
     function cpx_get_latest_cp_in_store($st_id, $number = 1, $return_what = 'post_title')
     {
-        global $wpdb;
-		$qr = "
-        SELECT post_id AS cp_id FROM wp_postmeta WHERE
-        (meta_key = 'store_id_metadata' AND meta_value={$st_id})
-        AND post_id IN (SELECT ID FROM wp_posts WHERE post_type = 'coupon' AND post_status='publish')
-        AND meta_value IN (SELECT ID FROM wp_posts WHERE post_type = 'store' AND post_status='publish')
-        ORDER BY meta_id DESC LIMIT 0,$number
-        ";
-		$rs = $wpdb->get_results($qr, ARRAY_A);
-		if (count($rs) > 0)
-		{
-            if($number == 1)
-            {
-                if($return_what == 'post_title')
-                    return get_post_field('post_title', $rs[0]['cp_id']);
-                else
-                    return $rs[0]['cp_id'];
+        $args = [
+        	'post_type' => 'coupon',
+            'orderby' => 'post_date_gmt',
+            'order' => 'DESC',
+            'post_status' => ['publish'],
+        	'meta_query' => [
+                //'relation' => 'AND',
+                [
+                    'key' => 'store_id_metadata',
+                    'value' => $st_id,
+                    'compare' => '='
+                ]
+            ]
+        ];
+        if(!$number){
+            $args['posts_per_page'] = -1;
+        }else{
+            $args['posts_per_page'] = $number;
+        }
+
+        $the_query = new WP_Query( $args );
+        if($the_query->have_posts()){
+            $arrPosts = $the_query->posts;
+            if($number == 1){
+                if($return_what == 'post_title'){
+                    return $arrPosts[0]->post_title;
+                }else{
+                    return $arrPosts[0]->ID;
+                }
+            }else{
+                return $arrPosts;
             }
-            else if($number > 1)
-            {
-                return $rs;
-            }
-		}
+        }
     }
     function cpx_current_url()
 	{
@@ -665,12 +677,14 @@
         $the_query = new WP_Query( $args );
         return $the_query->post_count;
     }
-    function getCouponsByStore($storeId, $status = array('publish'))
+    function getCouponsByStore($storeId, $status = array('publish'), $numOfPost = -1)
     {
         $args = array(
-        	'posts_per_page' => -1,
+        	'posts_per_page' => $numOfPost,
         	'post_type' => 'coupon',
             'post_status' => $status,
+            'orderby' => 'post_date_gmt',
+            'order' => 'DESC',
         	'meta_query' => array(
         		//'relation' => 'AND',
                 array(

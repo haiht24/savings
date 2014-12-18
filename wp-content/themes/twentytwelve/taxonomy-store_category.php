@@ -51,10 +51,10 @@
     $st_title = get_post_field('post_title', $s->ID);
     $cp_id = cpx_get_latest_cp_in_store($s->ID, 1, 'ID');
     // If store have published coupon => alter store title with [store_name(removed "Coupon Codes") + coupon title]
-    if($cp_id)
+    if($cp_id){
         $st_alter_title = str_replace('Coupon Codes', '', $st_title) . ' ' . cpx_get_latest_cp_in_store($s->ID);
-    else
-        $st_alter_title = $st_title;
+    }
+    else{$st_alter_title = $st_title;}
 
     $st_permalink = get_post_field('post_name', $s->ID);
     $st_permalink = home_url().'/'.$st_permalink;
