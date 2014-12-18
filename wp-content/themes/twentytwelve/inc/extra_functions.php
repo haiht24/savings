@@ -325,13 +325,13 @@
 	 */
 	function cpx_get_latest_cp_by_store()
 	{
-        $args = [
-        	'post_type' => 'store',
+        $args = array(
+            'post_type' => 'store',
             'orderby' => 'post_date_gmt',
             'order' => 'DESC',
             'posts_per_page' => 20,
-            'post_status' => ['publish']
-        ];
+            'post_status' => array('publish')
+        );
         $the_query = new WP_Query($args);
         if($the_query->have_posts()){
             return $the_query->posts;
@@ -339,20 +339,20 @@
 	}
     function cpx_get_latest_cp_in_store($st_id, $number = 1, $return_what = 'post_title')
     {
-        $args = [
-        	'post_type' => 'coupon',
+        $args = array(
+            'post_type' => 'coupon',
             'orderby' => 'post_date_gmt',
             'order' => 'DESC',
             'post_status' => ['publish'],
-        	'meta_query' => [
+        	'meta_query' => array(
                 //'relation' => 'AND',
-                [
+                array(
                     'key' => 'store_id_metadata',
                     'value' => $st_id,
                     'compare' => '='
-                ]
-            ]
-        ];
+                )
+            )
+        );
         if(!$number){
             $args['posts_per_page'] = -1;
         }else{
