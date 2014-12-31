@@ -343,7 +343,7 @@
             'post_type' => 'coupon',
             'orderby' => 'post_date_gmt',
             'order' => 'DESC',
-            'post_status' => ['publish'],
+            'post_status' => array('publish'),
         	'meta_query' => array(
                 //'relation' => 'AND',
                 array(
@@ -677,7 +677,7 @@
         $the_query = new WP_Query( $args );
         return $the_query->post_count;
     }
-    function getCouponsByStore($storeId, $status = array('publish'), $numOfPost = -1)
+    function getCouponsByStore($storeId, $status = array('publish'), $numOfPost = -1, $return = 'ID')
     {
         $args = array(
         	'posts_per_page' => $numOfPost,
@@ -697,9 +697,16 @@
         $the_query = new WP_Query( $args );
         $rs = array();
         if($the_query->have_posts()){
-            foreach ($the_query->posts as $p) {
-                array_push($rs, $p->ID);
+            if($return == 'ID'){
+                foreach ($the_query->posts as $p) {
+                    array_push($rs, $p->ID);
+                }
+            }else if($return == 'object'){
+                foreach ($the_query->posts as $p) {
+                    array_push($rs, $p);
+                }
             }
+
         }
         return $rs;
     }
@@ -715,4 +722,109 @@
 			return $str;
         $newstr = substr($str, 0, $maxlen);
         return $newstr.$endchar;
+    }
+    // Get Random store
+    function getRandomStores($numOfPost = -1, $post_type = 'store', array $post_status = array('pending'), $getPostEmptyContent = 0, $return = 'object'){
+        $args = array(
+            'post_type' => $post_type,
+            'orderby' => 'rand',
+            'post_status' => $post_status,
+            'posts_per_page' => $numOfPost,
+            'meta_query' => array(
+        		array(
+        			'key' => 'empty_content_metadata',
+        			'value' => $getPostEmptyContent,
+        			'compare' => '='
+        		)
+            )
+        );
+        $theQuery = new WP_Query($args);
+        if($theQuery->have_posts()){
+            if($return == 'object'){
+                return $theQuery->posts;
+            }else{
+                $arr = array();
+                foreach ($theQuery->posts as $p) {
+                    array_push($arr, $p->ID);
+                }
+                return $arr;
+            }
+        }
+    }
+    // Get random posts
+    function getRandomPosts($numOfPost = -1, $post_type = array('store'), array $post_status = array('pending'), $return = 'object'){
+        $args = array(
+            'post_type' => $post_type,
+            'orderby' => 'rand',
+            'post_status' => $post_status,
+            'posts_per_page' => $numOfPost
+        );
+        $theQuery = new WP_Query($args);
+        if($theQuery->have_posts()){
+            if($return == 'object'){
+                return $theQuery->posts;
+            }else{
+                $arr = array();
+                foreach ($theQuery->posts as $p) {
+                    array_push($arr, $p->ID);
+                }
+                return $arr;
+            }
+        }
+    }
+    function spinContent($email, $api_key, $getRemainSpin = false, $content = '', $protected_terms = ''){
+        require_once (get_template_directory() . "/js/spin/SpinRewriterAPI.php");
+        $spinrewriter_api = new SpinRewriterAPI($email, $api_key);
+        /**
+         * GET REMAIN SPIN
+         */
+        if($getRemainSpin){
+            return $spinrewriter_api->getQuota();
+        }
+        /**
+         * SPIN CONTENT
+         */
+        if($protected_terms){
+            $spinrewriter_api->setProtectedTerms($protected_terms);
+        }
+    	// (optional) Set whether the One-Click Rewrite process automatically protects Capitalized Words outside the article's title.
+    	$spinrewriter_api->setAutoProtectedTerms(true);
+    	// (optional) Set the confidence level of the One-Click Rewrite process.
+    	$spinrewriter_api->setConfidenceLevel("low");
+    	// (optional) Set whether the One-Click Rewrite process uses nested spinning syntax (multi-level spinning) or not.
+    	$spinrewriter_api->setNestedSpintax(true);
+    	// (optional) Set whether Spin Rewriter rewrites complete sentences on its own.
+    	$spinrewriter_api->setAutoSentences(false);
+    	// (optional) Set whether Spin Rewriter rewrites entire paragraphs on its own.
+    	$spinrewriter_api->setAutoParagraphs(false);
+    	// (optional) Set whether Spin Rewriter writes additional paragraphs on its own.
+    	$spinrewriter_api->setAutoNewParagraphs(false);
+    	// (optional) Set whether Spin Rewriter changes the entire structure of phrases and sentences.
+    	$spinrewriter_api->setAutoSentenceTrees(false);
+    	// (optional) Set the desired spintax format to be used with the returned spun text.
+    	$spinrewriter_api->setSpintaxFormat("{|}");
+
+        $api_response = $spinrewriter_api->getUniqueVariation($content);
+        return $api_response;
+    }
+    // add mark store no description
+    function doItNow(){
+        $qr = "
+            SELECT ID,post_content FROM wp_posts WHERE post_type = 'store'
+            AND ID NOT IN
+            (SELECT post_id FROM wp_postmeta WHERE meta_key='empty_content_metadata')
+            LIMIT 0,500
+        ";
+        global $wpdb;
+        $rs = $wpdb->get_results($qr);
+        if(count($rs) > 0){
+            foreach ($rs as $p) {
+                if($p->post_content == ''){
+                    add_post_meta($p->ID, 'empty_content_metadata', 1, true);
+                }else{
+                    add_post_meta($p->ID, 'empty_content_metadata', 0, true);
+                }
+            }
+        }
+        echo json_encode(count($rs));
     }

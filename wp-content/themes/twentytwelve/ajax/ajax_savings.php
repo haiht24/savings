@@ -168,6 +168,11 @@
          $storeDesc = $html->find('div[data-id="text-full"]', 0)->plaintext;
          if ($storeDesc) {
              wp_update_post(array('ID' => $storeID, 'post_content' => $storeDesc));
+             add_post_meta($storeID, 'empty_content_metadata', 0, true);
+         }
+         else{
+             // Mark as empty store description
+             add_post_meta($storeID, 'empty_content_metadata', 1, true);
          }
          // Get store Home page
          $storeHomePage = '';

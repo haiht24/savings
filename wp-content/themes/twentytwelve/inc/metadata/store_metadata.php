@@ -11,6 +11,15 @@
 			'context' => 'normal',
 			'priority' => 'high',
 			'fields' => array(
+                // Content before spin
+                array(
+					'id' => 'oldStoreContent_metadata',
+					'label' => 'Content before spin',
+					'desc' => '',
+					'std' => '',
+					'type' => 'textarea',
+					'class' => '',
+					'choices' => ''),
                 // All coupon type off
 				array(
 					'id' => 'store_type_off_metadata',
@@ -71,6 +80,15 @@
 					'label' => 'View Count',
 					'desc' => '',
 					'std' => 1,
+					'type' => 'text',
+					'class' => '',
+					'choices' => ''),
+                // Empty description
+                 array(
+					'id' => 'empty_content_metadata',
+					'label' => 'Is Empty Content',
+					'desc' => '',
+					'std' => '',
 					'type' => 'text',
 					'class' => '',
 					'choices' => '')

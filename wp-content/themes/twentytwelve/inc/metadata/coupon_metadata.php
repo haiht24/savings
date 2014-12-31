@@ -11,6 +11,15 @@
 			'context' => 'normal',
 			'priority' => 'high',
 			'fields' => array(
+                // Coupon content before spin
+                array(
+					'id' => 'oldCouponContent_metadata',
+					'label' => 'Content before spin',
+					'desc' => '',
+					'std' => '',
+					'type' => 'textarea',
+					'class' => '',
+					'choices' => ''),
                 // In store
                 array(
 					'id' => 'store_id_metadata',
