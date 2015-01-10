@@ -7,7 +7,7 @@
     // CSS
     wp_enqueue_style('bootstrap', get_template_directory_uri() . '/css/spin/bootstrap.min.css');
     // SCRIPT
-    wp_enqueue_script('angularJS', get_template_directory_uri() . '/js/libs/angular.min.js');
+    //wp_enqueue_script('angularJS', get_template_directory_uri() . '/js/libs/angular.min.js');
     wp_enqueue_script('spinScripts', get_template_directory_uri() . '/js/spin/spin.js');
 ?>
 <title>Spin</title>
@@ -35,11 +35,16 @@ input{padding: 10px;}
         <p></p>
         <input style="width: 100%;" type="text" ng-model="protectKeyword" placeholder="Protect keywords" />
         <p></p>
+        <select ng-model = "slGetType" ng-init = "slGetType = 'coupons'">
+            <option value="stores">Get Stores</option>
+            <option value="coupons">Get Coupons</option>
+        </select>
         <button type="button" class="btn btn-danger" ng-click="start()">Start</button>
         <button type="button" class="btn btn-danger" ng-click="spinNow()">Spin Now!</button>
 
         <button type="button" class="btn btn-primary" ng-click = "markStoreEmptyDescription()">Mark stores empty description</button>
         <label ng-bind = "countPosts"></label>
+        Spined:<label ng-model = "spined" ng-bind = "spined" ng-init = "spined = 0"></label>
 <!-- Loading -->
         <div id="ballsWaveG" ng-show="isShow">
             <div id="ballsWaveG_1" class="ballsWaveG">

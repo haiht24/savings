@@ -1,4 +1,9 @@
 <?php
+    function addAngularJsLibs(){
+        wp_enqueue_script('angularJS', get_template_directory_uri() . '/js/libs/angular.min.js');
+    }
+    add_action('wp_head', 'addAngularJsLibs');
+
 	include_once ('load_custom_post_type.php');
 	include_once ('load_metadata.php');
     include_once ('load_widgets.php');
@@ -360,6 +365,7 @@
         }
 
         $the_query = new WP_Query( $args );
+
         if($the_query->have_posts()){
             $arrPosts = $the_query->posts;
             if($number == 1){
@@ -729,15 +735,18 @@
             'post_type' => $post_type,
             'orderby' => 'rand',
             'post_status' => $post_status,
-            'posts_per_page' => $numOfPost,
-            'meta_query' => array(
+            'posts_per_page' => $numOfPost
+        );
+        if($getPostEmptyContent >= 0){
+            $args['meta_query'] = array(
         		array(
         			'key' => 'empty_content_metadata',
         			'value' => $getPostEmptyContent,
         			'compare' => '='
         		)
-            )
-        );
+            );
+        }
+
         $theQuery = new WP_Query($args);
         if($theQuery->have_posts()){
             if($return == 'object'){
@@ -752,13 +761,23 @@
         }
     }
     // Get random posts
-    function getRandomPosts($numOfPost = -1, $post_type = array('store'), array $post_status = array('pending'), $return = 'object'){
+    function getRandomPosts($numOfPost = -1, $post_type = array('store'), array $post_status = array('pending'), $return = 'object', $meta_key_in = array()){
         $args = array(
             'post_type' => $post_type,
             'orderby' => 'rand',
             'post_status' => $post_status,
             'posts_per_page' => $numOfPost
         );
+        if($meta_key_in){
+            $args['meta_query'] = array(
+        		array(
+        			'key' => $meta_key_in[0],
+        			'value' => $meta_key_in[2],
+        			'compare' => $meta_key_in[1]
+        		)
+            );
+        }
+
         $theQuery = new WP_Query($args);
         if($theQuery->have_posts()){
             if($return == 'object'){

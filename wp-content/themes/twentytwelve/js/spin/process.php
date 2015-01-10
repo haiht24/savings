@@ -113,27 +113,37 @@
  }
  // Before spin
  if ($request->action == 'beforeSpin') {
+     $getType = $request->getType;
      $arr = array();
-     $arrStores = getRandomStores(300, 'store', array('pending'), 0, 'ID');
-     $arr = $arrStores;
+     if ($getType == 'stores') {
+         $arrStores = getRandomStores(300, 'store', array('pending'), 0, 'ID');
+         $arr = $arrStores;
 
-     // Neu lay du store co desc
-     if (count($arr) < 300 || !$arr) {
-         // Neu ko du lay them store ko co desc
-         if ($arr) {
-             $arr = array_merge($arrStores, getRandomStores(300 - count($arrStores), 'store', array('pending'), 1,
-                 'ID'));
-         } else {
-             $arr = getRandomStores(300 - count($arrStores), 'store', array('pending'), 1, 'ID');
+         // Neu lay du store co desc
+         if (count($arr) < 300 || !$arr) {
+             // Neu ko du lay them store ko co desc
+             if ($arr) {
+                 $arr = array_merge($arrStores, getRandomStores(300 - count($arrStores), 'store', array('pending'), 1,
+                     'ID'));
+             } else {
+                 $arr = getRandomStores(300 - count($arrStores), 'store', array('pending'), 1, 'ID');
+             }
+         }
+         // Neu store ko du 300, lay them coupon
+         if (!$arr || count($arr) < 300) {
+             if (count($arr) < 300 && $arr) {
+                 $arr = array_merge($arr, getRandomPosts(300 - count($arr), array('coupon'), array('pending'), 'ID'));
+             } else {
+                 $arr = getRandomPosts(300 - count($arr), array('coupon'), array('pending'), 'ID');
+             }
          }
      }
-     // Neu store ko du 300, lay them coupon
-     if (!$arr || count($arr) < 300) {
-         if (count($arr) < 300 && $arr) {
-             $arr = array_merge($arr, getRandomPosts(300 - count($arr), array('coupon'), array('pending'), 'ID'));
-         } else {
-             $arr = getRandomPosts(300 - count($arr), array('coupon'), array('pending'), 'ID');
-         }
+     else if($getType == 'coupons'){
+        // GET COUPONS IN PUBLISHED STORES
+        $publishedStores = getRandomStores(-1, 'store', array('publish'), -1, 'ID');
+        $meta_key_in = array('store_id_metadata', 'IN', $publishedStores);
+        $arrCoupons = getRandomPosts(300, array('coupon'), array('pending'), 'ID', $meta_key_in);
+        $arr = $arrCoupons;
      }
      echo json_encode($arr);
  }
@@ -147,16 +157,13 @@
      echo json_encode($api_response);
  }
  // Save config
- if($request->action == 'saveConfig'){
-    $email = $request->configEmail;
-    $apiKey = $request->apiKey;
-    update_option('spinEmail', $email);
-    update_option('spinApiKey', $apiKey);
+ if ($request->action == 'saveConfig') {
+     $email = $request->configEmail;
+     $apiKey = $request->apiKey;
+     update_option('spinEmail', $email);
+     update_option('spinApiKey', $apiKey);
  }
  // Load config
- if($request->action == 'loadConfig'){
-    echo json_encode(array(
-        'spinEmail' => get_option('spinEmail'),
-        'spinApiKey' => get_option('spinApiKey')
-    ));
+ if ($request->action == 'loadConfig') {
+     echo json_encode(array('spinEmail' => get_option('spinEmail'), 'spinApiKey' => get_option('spinApiKey')));
  }

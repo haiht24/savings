@@ -15,39 +15,12 @@ spinApp.controller('spinCtrl', function($scope, $http, $timeout, $document){
     //$scope.mess = 'Post Spinner';
     $scope.oldDomain = 'Savings.com';
     $scope.newDomain = 'StoreCoupons.me';
-    $scope.protectKeyword = 'coupon,coupons,promo,promos,promotion,code,codes,discount,voucher,vouchers';
+    $scope.protectKeyword = 'coupon,coupons,promo,promos,promotion,code,codes,discount,voucher,vouchers,free shipping';
     // Spin now
     $scope.spinNow = function(){
         spin();
     }
     function spin(){
-//        $scope.isShow = true;
-//        var $postID = angular.element(document.querySelector('#postID'));
-//
-//        var request = $http({
-//            method: "post",
-//            url: tempDirUri + '/js/spin/process.php',
-//            data: {
-//                myID : $postID.text(),
-//                action : 'spin',
-//                configEmail : $scope.configEmail,
-//                apiKey : $scope.apiKey,
-//                oldDomain : $scope.oldDomain,
-//                newDomain : $scope.newDomain,
-//                protectKeyword : $scope.protectKeyword
-//            },
-//            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-//        });
-//        request.success(function (data) {
-//            $scope.isShow = false;
-//            $postID.remove();
-//            console.log(data);
-//            // Loop
-//            if(!data['isStop']){
-//                $timeout(spin, 1000);
-//            }
-//        });
-        ///////
         $scope.isShow = true;
         var $postID = angular.element(document.querySelector('#postID'));
          _request('requestBeforeSpin', {
@@ -62,8 +35,9 @@ spinApp.controller('spinCtrl', function($scope, $http, $timeout, $document){
             $scope.isShow = false;
             $postID.remove();
             console.log(response);
+            $scope.spined += 1;
             // Loop
-            if(!data['isStop']){
+            if(!response['isStop']){
                 $timeout(spin, 1000);
             }
         });
@@ -71,7 +45,8 @@ spinApp.controller('spinCtrl', function($scope, $http, $timeout, $document){
     function beforeSpin(){
         $scope.isShow = true;
          _request('requestBeforeSpin', {
-            action : 'beforeSpin'
+            action : 'beforeSpin',
+            getType : $scope.slGetType
         },function (response) {
             $scope.isShow = false;
             if(response.length > 0){
@@ -92,13 +67,13 @@ spinApp.controller('spinCtrl', function($scope, $http, $timeout, $document){
         });
     }
     // Count Spin remain
+
     $scope.checkAvaiable = function(){
         _request('requestRemain', {
             action : 'remain',
             configEmail : $scope.configEmail,
             apiKey : $scope.apiKey
         },function (response) {
-            //$scope.messCalculate = 'Stats';
             $scope.used = response['api_requests_made'];
             $scope.spinRemain = response['api_requests_available'];
         });
